@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 基础样式 */
+@layer base {
+  body {
+    @apply font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+/* 组件样式 */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 text-sm font-medium transition-all duration-200 rounded-none;
+  }
+
+  .btn-primary {
+    @apply bg-dark text-white hover:bg-gray-800;
+  }
+
+  .btn-outline {
+    @apply border border-dark text-dark hover:bg-dark hover:text-white;
+  }
+
+  .btn-accent {
+    @apply bg-accent-500 text-white hover:bg-accent-600;
+  }
+
+  .input {
+    @apply w-full px-4 py-3 border border-gray-300 focus:border-dark focus:ring-0 focus:outline-none transition-colors;
+  }
+
+  .link {
+    @apply text-dark underline-offset-4 hover:underline;
+  }
+
+  .card {
+    @apply bg-white p-6 shadow-sm;
+  }
+
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+/* 产品卡片悬浮效果 */
+.product-card {
+  @apply relative overflow-hidden bg-white;
+}
+
+.product-card:hover .product-image {
+  @apply scale-105;
+}
+
+.product-card .product-image {
+  @apply transition-transform duration-500 ease-out;
+}
+
+/* 动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.slide-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.slide-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* 图片懒加载占位 */
+.image-placeholder {
+  @apply bg-gray-100 animate-pulse;
+}
