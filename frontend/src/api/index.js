@@ -1,13 +1,17 @@
 import axios from 'axios'
+import router from '@/router'
 
 // 创建 Axios 实例
 const http = axios.create({
   baseURL: '/api',
-  timeout: 10000,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json'
   }
 })
+
+// 是否正在跳转登录（防止重复跳转）
+let isRedirectingToLogin = false
 
 // 请求拦截器
 http.interceptors.request.use(
@@ -25,14 +29,50 @@ http.interceptors.request.use(
 http.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    const message = error.response?.data?.error || '请求失败'
-    
-    // 401 未授权
-    if (error.response?.status === 401) {
-      localStorage.removeItem('auth-token')
-      window.location.href = '/login'
+    // 网络错误（无 response）
+    if (!error.response) {
+      return Promise.reject(new Error('网络连接失败，请检查网络后重试'))
     }
-    
+
+    const { status, data } = error.response
+    let message = data?.error || '请求失败'
+
+    // 401 未授权 - 使用 Vue Router 而不是 window.location
+    if (status === 401 && !isRedirectingToLogin) {
+      isRedirectingToLogin = true
+      localStorage.removeItem('auth-token')
+
+      const currentPath = router.currentRoute?.value?.fullPath
+      // 不在登录页才跳转
+      if (currentPath && currentPath !== '/login') {
+        router.push({ name: 'login', query: { redirect: currentPath } })
+      }
+
+      // 防止短时间内重复跳转
+      setTimeout(() => { isRedirectingToLogin = false }, 2000)
+      message = '登录已过期，请重新登录'
+    }
+
+    // 403 无权限
+    if (status === 403) {
+      message = '没有权限执行此操作'
+    }
+
+    // 422 验证错误
+    if (status === 422) {
+      message = data?.errors?.map(e => e.message).join('，') || message
+    }
+
+    // 429 请求过多
+    if (status === 429) {
+      message = '请求过于频繁，请稍后再试'
+    }
+
+    // 500 服务器错误
+    if (status >= 500) {
+      message = '服务器内部错误，请稍后重试'
+    }
+
     return Promise.reject(new Error(message))
   }
 )
@@ -106,6 +146,35 @@ const api = {
   payments: {
     createIntent: (orderId) => http.post('/payments/create-payment-intent', { orderId }),
     confirm: (data) => http.post('/payments/confirm', data)
+  },
+
+  // 管理后台
+  admin: {
+    dashboard: () => http.get('/admin/dashboard'),
+    // 商品
+    products: (params) => http.get('/admin/products', { params }),
+    product: (id) => http.get(`/admin/products/${id}`),
+    createProduct: (data) => http.post('/admin/products', data),
+    updateProduct: (id, data) => http.put(`/admin/products/${id}`, data),
+    deleteProduct: (id) => http.delete(`/admin/products/${id}`),
+    // 变体
+    createVariant: (productId, data) => http.post(`/admin/products/${productId}/variants`, data),
+    updateVariant: (productId, id, data) => http.put(`/admin/products/${productId}/variants/${id}`, data),
+    deleteVariant: (productId, id) => http.delete(`/admin/products/${productId}/variants/${id}`),
+    // 图片
+    addImage: (productId, data) => http.post(`/admin/products/${productId}/images`, data),
+    deleteImage: (productId, id) => http.delete(`/admin/products/${productId}/images/${id}`),
+    // 订单
+    orders: (params) => http.get('/admin/orders', { params }),
+    order: (id) => http.get(`/admin/orders/${id}`),
+    updateOrderStatus: (id, data) => http.put(`/admin/orders/${id}/status`, data),
+    // 分类
+    createCategory: (data) => http.post('/admin/categories', data),
+    updateCategory: (id, data) => http.put(`/admin/categories/${id}`, data),
+    deleteCategory: (id) => http.delete(`/admin/categories/${id}`),
+    // 用户
+    users: (params) => http.get('/admin/users', { params }),
+    updateUser: (id, data) => http.put(`/admin/users/${id}`, data)
   }
 }
 

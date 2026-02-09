@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Hero Section -->
-    <section class="relative h-[80vh] min-h-[600px] bg-primary-100">
+    <section class="relative h-[60vh] sm:h-[70vh] lg:h-[80vh] min-h-[400px] sm:min-h-[500px] lg:min-h-[600px] bg-primary-100">
       <div class="absolute inset-0">
         <img 
           src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1920&q=80"
@@ -13,10 +13,10 @@
       
       <div class="relative container-custom h-full flex items-center">
         <div class="max-w-xl text-white">
-          <h1 class="text-5xl lg:text-6xl font-serif font-bold leading-tight mb-6 animate-fade-in">
+          <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold leading-tight mb-4 sm:mb-6 animate-fade-in">
             发现你的<br>独特风格
           </h1>
-          <p class="text-lg lg:text-xl mb-8 text-gray-200">
+          <p class="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 text-gray-200">
             精选艺术戒指，每一枚都是独一无二的艺术品
           </p>
           <RouterLink to="/shop" class="btn btn-primary bg-white text-dark hover:bg-gray-100">
@@ -27,13 +27,13 @@
     </section>
 
     <!-- 特色分类 -->
-    <section class="container-custom py-20">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <section class="container-custom py-10 sm:py-16 lg:py-20">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         <RouterLink 
           v-for="item in featuredCategories"
           :key="item.slug"
           :to="`/category/${item.slug}`"
-          class="group relative aspect-[4/5] overflow-hidden"
+          class="group relative aspect-[3/2] sm:aspect-[4/5] overflow-hidden"
         >
           <img 
             :src="item.image"
@@ -50,15 +50,15 @@
     </section>
 
     <!-- 新品上市 -->
-    <section class="container-custom py-20">
-      <div class="flex items-center justify-between mb-10">
-        <h2 class="text-3xl font-serif font-bold">新品上市</h2>
+    <section class="container-custom py-10 sm:py-16 lg:py-20">
+      <div class="flex items-center justify-between mb-6 sm:mb-10">
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold">新品上市</h2>
         <RouterLink to="/shop?sort=newest" class="link">
           查看全部 →
         </RouterLink>
       </div>
       
-      <div v-if="isLoading" class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div v-if="isLoading" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <div v-for="i in 4" :key="i" class="animate-pulse">
           <div class="aspect-square bg-gray-200 mb-4"></div>
           <div class="h-4 bg-gray-200 mb-2"></div>
@@ -66,7 +66,7 @@
         </div>
       </div>
 
-      <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <ProductCard 
           v-for="product in newProducts"
           :key="product.id"
@@ -76,7 +76,7 @@
     </section>
 
     <!-- 品牌故事 -->
-    <section class="bg-primary-100 py-20">
+    <section class="bg-primary-100 py-10 sm:py-16 lg:py-20">
       <div class="container-custom">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div class="order-2 lg:order-1">
@@ -107,15 +107,15 @@
     </section>
 
     <!-- 畅销商品 -->
-    <section class="container-custom py-20">
-      <div class="flex items-center justify-between mb-10">
-        <h2 class="text-3xl font-serif font-bold">畅销商品</h2>
+    <section class="container-custom py-10 sm:py-16 lg:py-20">
+      <div class="flex items-center justify-between mb-6 sm:mb-10">
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold">畅销商品</h2>
         <RouterLink to="/shop?sort=popular" class="link">
           查看全部 →
         </RouterLink>
       </div>
       
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <ProductCard 
           v-for="product in bestSellers"
           :key="product.id"
@@ -153,9 +153,9 @@
     </section>
 
     <!-- Instagram Feed -->
-    <section class="py-20">
-      <div class="text-center mb-10">
-        <h2 class="text-3xl font-serif font-bold mb-2">@ArtRing</h2>
+    <section class="py-10 sm:py-16 lg:py-20">
+      <div class="text-center mb-6 sm:mb-10">
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold mb-2">@ArtRing</h2>
         <p class="text-gray-500">关注我们的 Instagram</p>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6">

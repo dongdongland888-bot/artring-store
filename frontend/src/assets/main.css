@@ -16,7 +16,8 @@
 /* 组件样式 */
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center px-6 py-3 text-sm font-medium transition-all duration-200 rounded-none;
+    @apply inline-flex items-center justify-center px-4 py-2.5 sm:px-6 sm:py-3 text-sm font-medium transition-all duration-200 rounded-none;
+    min-height: 44px; /* touch-friendly tap target */
   }
 
   .btn-primary {
@@ -32,7 +33,7 @@
   }
 
   .input {
-    @apply w-full px-4 py-3 border border-gray-300 focus:border-dark focus:ring-0 focus:outline-none transition-colors;
+    @apply w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-300 rounded-none focus:border-dark focus:ring-0 focus:outline-none transition-colors text-base sm:text-sm;
   }
 
   .link {
@@ -40,7 +41,7 @@
   }
 
   .card {
-    @apply bg-white p-6 shadow-sm;
+    @apply bg-white p-4 sm:p-6 shadow-sm rounded-lg;
   }
 
   .container-custom {
@@ -109,4 +110,24 @@
 /* 图片懒加载占位 */
 .image-placeholder {
   @apply bg-gray-100 animate-pulse;
+}
+
+/* Mobile: prevent zoom on input focus (iOS) */
+@media screen and (max-width: 640px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Ensure tap targets are at least 44px */
+@media (pointer: coarse) {
+  button, a {
+    min-height: 44px;
+  }
 }

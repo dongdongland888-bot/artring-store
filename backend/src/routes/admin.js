@@ -223,6 +223,84 @@ router.delete('/products/:id', asyncHandler(async (req, res) => {
   res.json({ message: '商品已删除' });
 }));
 
+// 获取单个商品详情 (管理员)
+router.get('/products/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const product = await prisma.product.findUnique({
+    where: { id },
+    include: {
+      category: true,
+      variants: { orderBy: { createdAt: 'asc' } },
+      images: { orderBy: { sortOrder: 'asc' } }
+    }
+  });
+
+  if (!product) {
+    return res.status(404).json({ error: '商品不存在' });
+  }
+
+  res.json(product);
+}));
+
+// ==================== 商品变体管理 ====================
+
+router.post('/products/:id/variants', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { sku, size, color, material, price, stock } = req.body;
+
+  const variant = await prisma.productVariant.create({
+    data: { productId: id, sku, size, color, material, price, stock: stock || 0 }
+  });
+
+  res.status(201).json({ message: '变体创建成功', variant });
+}));
+
+router.put('/products/:productId/variants/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { sku, size, color, material, price, stock, isActive } = req.body;
+
+  const variant = await prisma.productVariant.update({
+    where: { id },
+    data: { sku, size, color, material, price, stock, isActive }
+  });
+
+  res.json({ message: '变体更新成功', variant });
+}));
+
+router.delete('/products/:productId/variants/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  await prisma.productVariant.delete({ where: { id } });
+  res.json({ message: '变体已删除' });
+}));
+
+// ==================== 商品图片管理 ====================
+
+router.post('/products/:id/images', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { url, alt, isPrimary } = req.body;
+
+  if (isPrimary) {
+    await prisma.productImage.updateMany({
+      where: { productId: id },
+      data: { isPrimary: false }
+    });
+  }
+
+  const count = await prisma.productImage.count({ where: { productId: id } });
+  const image = await prisma.productImage.create({
+    data: { productId: id, url, alt, sortOrder: count, isPrimary: isPrimary || count === 0 }
+  });
+
+  res.status(201).json({ message: '图片添加成功', image });
+}));
+
+router.delete('/products/:productId/images/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  await prisma.productImage.delete({ where: { id } });
+  res.json({ message: '图片已删除' });
+}));
+
 // ==================== 订单管理 ====================
 
 // 获取订单列表
@@ -260,6 +338,37 @@ router.get('/orders', asyncHandler(async (req, res) => {
       pages: Math.ceil(total / take)
     }
   });
+}));
+
+// 获取单个订单详情
+router.get('/orders/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: {
+      user: { select: { email: true, firstName: true, lastName: true } },
+      items: {
+        include: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              images: { take: 1, orderBy: { sortOrder: 'asc' } }
+            }
+          }
+        }
+      },
+      shippingAddress: true
+    }
+  });
+
+  if (!order) {
+    return res.status(404).json({ error: '订单不存在' });
+  }
+
+  res.json(order);
 }));
 
 // 更新订单状态

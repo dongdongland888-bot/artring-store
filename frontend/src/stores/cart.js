@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useToast } from 'vue-toastification'
 import api from '@/api'
 
 export const useCartStore = defineStore('cart', () => {
@@ -27,7 +28,10 @@ export const useCartStore = defineStore('cart', () => {
       const response = await api.cart.get()
       items.value = response.items
     } catch (error) {
-      console.error('Failed to fetch cart:', error)
+      // 401 等认证错误不需要提示，已由拦截器处理
+      if (error.message !== '登录已过期，请重新登录') {
+        console.error('Failed to fetch cart:', error)
+      }
     } finally {
       isLoading.value = false
     }
@@ -39,7 +43,11 @@ export const useCartStore = defineStore('cart', () => {
     try {
       await api.cart.add({ productId, variantId, quantity })
       await fetchCart()
-      isOpen.value = true // 打开购物车抽屉
+      isOpen.value = true
+    } catch (error) {
+      const toast = useToast()
+      toast.error(error.message || '添加失败')
+      throw error
     } finally {
       isLoading.value = false
     }
@@ -51,23 +59,35 @@ export const useCartStore = defineStore('cart', () => {
       return removeItem(itemId)
     }
     
-    isLoading.value = true
+    // 乐观更新
+    const item = items.value.find(i => i.id === itemId)
+    const oldQty = item?.quantity
+    if (item) item.quantity = quantity
+
     try {
       await api.cart.update(itemId, { quantity })
       await fetchCart()
-    } finally {
-      isLoading.value = false
+    } catch (error) {
+      // 回滚
+      if (item) item.quantity = oldQty
+      const toast = useToast()
+      toast.error(error.message || '更新失败')
     }
   }
 
   // 删除商品
   async function removeItem(itemId) {
-    isLoading.value = true
+    // 乐观更新
+    const oldItems = [...items.value]
+    items.value = items.value.filter(i => i.id !== itemId)
+
     try {
       await api.cart.remove(itemId)
-      await fetchCart()
-    } finally {
-      isLoading.value = false
+    } catch (error) {
+      // 回滚
+      items.value = oldItems
+      const toast = useToast()
+      toast.error(error.message || '删除失败')
     }
   }
 
@@ -77,6 +97,9 @@ export const useCartStore = defineStore('cart', () => {
     try {
       await api.cart.clear()
       items.value = []
+    } catch (error) {
+      const toast = useToast()
+      toast.error(error.message || '清空失败')
     } finally {
       isLoading.value = false
     }

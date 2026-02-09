@@ -17,7 +17,9 @@
       <!-- 侧边栏 -->
       <div class="fixed inset-0 overflow-hidden">
         <div class="absolute inset-0 overflow-hidden">
-          <div class="pointer-events-none fixed inset-y-0 left-0 flex max-w-full">
+          <div
+            class="pointer-events-none fixed inset-y-0 left-0 flex max-w-full"
+          >
             <TransitionChild
               as="template"
               enter="transform transition ease-in-out duration-300"
@@ -30,9 +32,11 @@
               <DialogPanel class="pointer-events-auto w-screen max-w-sm">
                 <div class="flex h-full flex-col bg-white shadow-xl">
                   <!-- 头部 -->
-                  <div class="flex items-center justify-between px-6 py-4 border-b">
+                  <div
+                    class="flex items-center justify-between px-6 py-4 border-b"
+                  >
                     <span class="text-xl font-serif font-bold">ArtRing</span>
-                    <button 
+                    <button
                       @click="$emit('close')"
                       class="p-2 hover:bg-gray-100 rounded-full"
                     >
@@ -43,8 +47,8 @@
                   <!-- 导航链接 -->
                   <div class="flex-1 overflow-y-auto py-6">
                     <nav class="space-y-2 px-4">
-                      <RouterLink 
-                        to="/shop" 
+                      <RouterLink
+                        to="/shop"
                         class="block px-4 py-3 hover:bg-gray-50 transition-colors"
                         @click="$emit('close')"
                       >
@@ -53,19 +57,19 @@
 
                       <!-- 分类 -->
                       <div>
-                        <button 
+                        <button
                           @click="showCategories = !showCategories"
                           class="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
                         >
                           <span>分类</span>
-                          <ChevronDownIcon 
+                          <ChevronDownIcon
                             class="w-5 h-5 transition-transform"
                             :class="{ 'rotate-180': showCategories }"
                           />
                         </button>
                         <transition name="slide">
                           <div v-if="showCategories" class="pl-4">
-                            <RouterLink 
+                            <RouterLink
                               v-for="category in categories"
                               :key="category.id"
                               :to="`/category/${category.slug}`"
@@ -78,15 +82,15 @@
                         </transition>
                       </div>
 
-                      <RouterLink 
-                        to="/about" 
+                      <RouterLink
+                        to="/about"
                         class="block px-4 py-3 hover:bg-gray-50 transition-colors"
                         @click="$emit('close')"
                       >
                         关于我们
                       </RouterLink>
-                      <RouterLink 
-                        to="/contact" 
+                      <RouterLink
+                        to="/contact"
                         class="block px-4 py-3 hover:bg-gray-50 transition-colors"
                         @click="$emit('close')"
                       >
@@ -97,17 +101,17 @@
 
                   <!-- 底部链接 -->
                   <div class="border-t px-6 py-4 space-y-2">
-                    <RouterLink 
+                    <RouterLink
                       v-if="!authStore.isLoggedIn"
-                      to="/login" 
+                      to="/login"
                       class="block w-full btn btn-primary text-center"
                       @click="$emit('close')"
                     >
                       登录
                     </RouterLink>
-                    <RouterLink 
+                    <RouterLink
                       v-else
-                      to="/account" 
+                      to="/account"
                       class="block w-full btn btn-outline text-center"
                       @click="$emit('close')"
                     >
@@ -125,26 +129,30 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, toRef } from "vue";
 import {
   Dialog,
   DialogPanel,
   TransitionChild,
   TransitionRoot,
-} from '@headlessui/vue'
-import { XMarkIcon, ChevronDownIcon } from '@heroicons/vue/24/outline'
-import { useAuthStore } from '@/stores/auth'
+} from "@headlessui/vue";
+import { XMarkIcon, ChevronDownIcon } from "@heroicons/vue/24/outline";
+import { useAuthStore } from "@/stores/auth";
+import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
 const props = defineProps({
   show: Boolean,
   categories: {
     type: Array,
-    default: () => []
-  }
-})
+    default: () => [],
+  },
+});
 
-defineEmits(['close'])
+defineEmits(["close"]);
 
-const authStore = useAuthStore()
-const showCategories = ref(false)
+const authStore = useAuthStore();
+const showCategories = ref(false);
+
+// Lock body scroll when menu is open
+useBodyScrollLock(toRef(props, "show"));
 </script>

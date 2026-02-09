@@ -100,6 +100,54 @@ const routes = [
     name: 'contact',
     component: () => import('@/views/Contact.vue')
   },
+  // 管理后台
+  {
+    path: '/admin',
+    component: () => import('@/views/admin/AdminLayout.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true },
+    children: [
+      {
+        path: '',
+        name: 'adminDashboard',
+        component: () => import('@/views/admin/Dashboard.vue')
+      },
+      {
+        path: 'products',
+        name: 'adminProducts',
+        component: () => import('@/views/admin/Products.vue')
+      },
+      {
+        path: 'products/new',
+        name: 'adminProductNew',
+        component: () => import('@/views/admin/ProductForm.vue')
+      },
+      {
+        path: 'products/:id/edit',
+        name: 'adminProductEdit',
+        component: () => import('@/views/admin/ProductForm.vue')
+      },
+      {
+        path: 'orders',
+        name: 'adminOrders',
+        component: () => import('@/views/admin/Orders.vue')
+      },
+      {
+        path: 'orders/:id',
+        name: 'adminOrderDetail',
+        component: () => import('@/views/admin/OrderDetail.vue')
+      },
+      {
+        path: 'users',
+        name: 'adminUsers',
+        component: () => import('@/views/admin/Users.vue')
+      },
+      {
+        path: 'categories',
+        name: 'adminCategories',
+        component: () => import('@/views/admin/Categories.vue')
+      }
+    ]
+  },
   {
     path: '/:pathMatch(.*)*',
     name: 'notFound',
@@ -120,14 +168,26 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
+
+  // 如果有 token 但没有 user 信息，先恢复用户数据
+  if (authStore.isLoggedIn && !authStore.user) {
+    try {
+      await authStore.fetchUser()
+    } catch {
+      // token 过期或无效，清除登录状态
+      authStore.logout()
+    }
+  }
 
   if (to.meta.requiresAuth && !authStore.isLoggedIn) {
     next({
       name: 'login',
       query: { redirect: to.fullPath }
     })
+  } else if (to.meta.requiresAdmin && !authStore.isAdmin) {
+    next({ name: 'home' })
   } else {
     next()
   }

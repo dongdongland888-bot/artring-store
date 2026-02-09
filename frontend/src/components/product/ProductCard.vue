@@ -13,7 +13,7 @@
       >
       
       <!-- 标签 -->
-      <div class="absolute top-3 left-3 flex flex-col gap-2">
+      <div class="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1 sm:gap-2">
         <span 
           v-if="isNew"
           class="bg-dark text-white text-xs px-2 py-1"
@@ -28,11 +28,11 @@
         </span>
       </div>
 
-      <!-- 快捷操作 -->
-      <div class="absolute inset-x-0 bottom-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <!-- 快捷操作 (always visible on mobile, hover on desktop) -->
+      <div class="absolute inset-x-0 bottom-0 p-2 sm:p-4 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <button 
           @click.prevent="addToCart"
-          class="w-full btn btn-primary text-sm"
+          class="w-full btn btn-primary text-xs sm:text-sm py-2 sm:py-3"
           :disabled="!hasStock"
         >
           {{ hasStock ? '加入购物车' : '售罄' }}
@@ -42,7 +42,7 @@
       <!-- 收藏按钮 -->
       <button 
         @click.prevent="toggleWishlist"
-        class="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+        class="absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2 bg-white/80 hover:bg-white rounded-full sm:opacity-0 group-hover:opacity-100 transition-opacity"
       >
         <HeartIcon 
           class="w-5 h-5"
@@ -52,8 +52,8 @@
     </div>
 
     <!-- 商品信息 -->
-    <div class="py-4">
-      <h3 class="font-medium text-sm mb-1 line-clamp-2 group-hover:text-accent-600 transition-colors">
+    <div class="py-2 sm:py-4">
+      <h3 class="font-medium text-xs sm:text-sm mb-1 line-clamp-2 group-hover:text-accent-600 transition-colors">
         {{ product.name }}
       </h3>
       
@@ -66,8 +66,8 @@
       </div>
 
       <!-- 价格 -->
-      <div class="flex items-center gap-2">
-        <span class="font-semibold text-accent-600">${{ product.basePrice }}</span>
+      <div class="flex items-center gap-1 sm:gap-2">
+        <span class="font-semibold text-sm sm:text-base text-accent-600">${{ product.basePrice }}</span>
         <span 
           v-if="product.comparePrice"
           class="text-sm text-gray-400 line-through"
