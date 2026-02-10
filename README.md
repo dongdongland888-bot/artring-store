@@ -63,6 +63,12 @@ cd artring-store
 docker compose up -d
 ```
 
+**修改代码后**（前端或后端文件有变更时），需要重新构建并启动：
+
+```bash
+docker compose up -d --build
+```
+
 访问地址：
 
 - 🏪 **前台**: http://localhost
@@ -296,12 +302,21 @@ npm ci --only=production
 # 或手动使用 docker compose
 docker compose up -d
 
+# 修改前端或后端代码后，需重新构建并启动
+docker compose up -d --build
+
 # 查看日志
 docker compose logs -f
 
 # 停止服务
 docker compose down
 ```
+
+| 场景           | 命令                           |
+| -------------- | ------------------------------ |
+| 首次启动       | `docker compose up -d`         |
+| 修改代码后更新 | `docker compose up -d --build` |
+| 仅查看日志     | `docker compose logs -f`       |
 
 ### 服务访问
 

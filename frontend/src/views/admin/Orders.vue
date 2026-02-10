@@ -100,10 +100,11 @@
             </td>
             <td class="px-6 py-3 text-right">
               <RouterLink
-                :to="`/admin/orders/${order.id}`"
-                class="text-blue-600 hover:underline text-sm"
-                >详情</RouterLink
+                :to="`/admin/orders/${order.orderNumber}`"
+                class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-dark border border-gray-300 rounded hover:bg-gray-50 transition-colors"
               >
+                查看详情
+              </RouterLink>
             </td>
           </tr>
           <tr v-if="orders.length === 0">

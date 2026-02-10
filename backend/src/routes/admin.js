@@ -5,6 +5,23 @@ import { authenticate, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// 将 Prisma Decimal / BigInt / Date 等不可直接 JSON 序列化的值转为普通类型，避免 res.json 报错
+function serializeForJson(obj) {
+  if (obj == null) return obj;
+  if (typeof obj === 'number' || typeof obj === 'string' || typeof obj === 'boolean') return obj;
+  if (typeof obj === 'bigint') return Number(obj);
+  if (obj instanceof Date) return obj.toISOString();
+  // Prisma Decimal (Decimal.js) 有 toNumber 方法
+  if (typeof obj === 'object' && typeof obj.toNumber === 'function') return obj.toNumber();
+  if (Array.isArray(obj)) return obj.map(serializeForJson);
+  if (typeof obj === 'object') {
+    const out = {};
+    for (const k of Object.keys(obj)) out[k] = serializeForJson(obj[k]);
+    return out;
+  }
+  return obj;
+}
+
 // 所有管理路由需要认证和管理权限
 router.use(authenticate);
 router.use(requireAdmin);
@@ -340,12 +357,18 @@ router.get('/orders', asyncHandler(async (req, res) => {
   });
 }));
 
-// 获取单个订单详情
+// 根据 id（UUID）或 orderNumber 查询订单
+const orderWhereByIdOrNumber = (id) => {
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  return isUuid ? { id } : { orderNumber: id };
+};
+
+// 获取单个订单详情（:id 支持 UUID 或订单号 orderNumber）
 router.get('/orders/:id', asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const order = await prisma.order.findUnique({
-    where: { id },
+  const order = await prisma.order.findFirst({
+    where: orderWhereByIdOrNumber(id),
     include: {
       user: { select: { email: true, firstName: true, lastName: true } },
       items: {
@@ -359,8 +382,7 @@ router.get('/orders/:id', asyncHandler(async (req, res) => {
             }
           }
         }
-      },
-      shippingAddress: true
+      }
     }
   });
 
@@ -368,16 +390,29 @@ router.get('/orders/:id', asyncHandler(async (req, res) => {
     return res.status(404).json({ error: '订单不存在' });
   }
 
-  res.json(order);
+  try {
+    const payload = serializeForJson(order);
+    return res.json(payload);
+  } catch (err) {
+    console.error('订单详情序列化失败:', err);
+    return res.status(500).json({ error: '服务器内部错误，请稍后重试' });
+  }
 }));
 
-// 更新订单状态
+// 更新订单状态（:id 支持 UUID 或订单号 orderNumber）
 router.put('/orders/:id/status', asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { status, trackingNumber } = req.body;
 
-  const updateData = { status };
+  const existing = await prisma.order.findFirst({
+    where: orderWhereByIdOrNumber(id),
+    select: { id: true }
+  });
+  if (!existing) {
+    return res.status(404).json({ error: '订单不存在' });
+  }
 
+  const updateData = { status };
   if (status === 'SHIPPED') {
     updateData.shippedAt = new Date();
     if (trackingNumber) {
@@ -388,7 +423,7 @@ router.put('/orders/:id/status', asyncHandler(async (req, res) => {
   }
 
   const order = await prisma.order.update({
-    where: { id },
+    where: { id: existing.id },
     data: updateData
   });
 
