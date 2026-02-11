@@ -9,11 +9,45 @@
     </div>
 
     <template v-else>
-      <h1 class="text-2xl sm:text-3xl font-serif font-bold mb-6 sm:mb-8">
-        结算
-      </h1>
+      <!-- 支付步骤：订单已创建，等待支付完成 -->
+      <div v-if="createdOrder" class="max-w-lg mx-auto py-12">
+        <h1 class="text-2xl font-serif font-bold mb-2">请完成支付</h1>
+        <p class="text-gray-500 mb-6">
+          订单号 {{ createdOrder.orderNumber }} · 应付
+          <span class="font-semibold text-dark"
+            >${{ Number(createdOrder.total).toFixed(2) }}</span
+          >
+        </p>
+        <div class="card">
+          <StripePayment
+            v-if="paymentMethod === 'stripe'"
+            :order-id="createdOrder.id"
+            :amount="createdOrder.total"
+            @success="onPaymentSuccess"
+            @error="onPaymentError"
+          />
+          <PayPalButton
+            v-else
+            :order-id="createdOrder.id"
+            :amount="createdOrder.total"
+            @success="onPaymentSuccess"
+            @error="onPaymentError"
+          />
+        </div>
+        <button
+          type="button"
+          class="btn btn-outline mt-4"
+          @click="
+            router.push('/order-success/' + createdOrder?.orderNumber);
+            createdOrder = null;
+          "
+        >
+          稍后支付
+        </button>
+      </div>
 
-      <div class="lg:flex gap-8 xl:gap-12">
+      <!-- 结算表单 -->
+      <div v-else class="lg:flex gap-8 xl:gap-12">
         <!-- Left -->
         <div class="flex-1 space-y-6">
           <!-- Shipping Address -->
@@ -79,23 +113,68 @@
             <p v-else class="text-gray-500 py-4">请先添加收货地址</p>
           </div>
 
-          <!-- Payment -->
+          <!-- Payment method selection -->
           <div class="card">
             <h2 class="text-lg font-semibold mb-4">支付方式</h2>
-            <div class="flex items-center gap-3 p-4 border rounded-lg">
-              <svg
-                class="w-8 h-8 text-blue-600"
-                fill="currentColor"
-                viewBox="0 0 24 24"
+            <div class="space-y-2">
+              <label
+                class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-all"
+                :class="
+                  paymentMethod === 'stripe'
+                    ? 'border-dark bg-gray-50 ring-2 ring-dark ring-opacity-20'
+                    : 'border-gray-200 hover:border-gray-300'
+                "
               >
-                <path
-                  d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 4v8h16V8H4z"
+                <input
+                  v-model="paymentMethod"
+                  type="radio"
+                  name="payment"
+                  value="stripe"
+                  class="sr-only"
                 />
-              </svg>
-              <div>
-                <p class="font-medium">Stripe 安全支付</p>
-                <p class="text-sm text-gray-500">支持信用卡/借记卡</p>
-              </div>
+                <svg
+                  class="w-8 h-8 text-blue-600 flex-shrink-0"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 4v8h16V8H4z"
+                  />
+                </svg>
+                <div>
+                  <p class="font-medium">Stripe 安全支付</p>
+                  <p class="text-sm text-gray-500">支持信用卡/借记卡</p>
+                </div>
+              </label>
+              <label
+                class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-all"
+                :class="
+                  paymentMethod === 'paypal'
+                    ? 'border-dark bg-gray-50 ring-2 ring-dark ring-opacity-20'
+                    : 'border-gray-200 hover:border-gray-300'
+                "
+              >
+                <input
+                  v-model="paymentMethod"
+                  type="radio"
+                  name="payment"
+                  value="paypal"
+                  class="sr-only"
+                />
+                <svg
+                  class="w-8 h-8 text-[#003087] flex-shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="#003087"
+                >
+                  <path
+                    d="M7.076 21.337H2.47a.641.641 0 0 1-.641-.641V3.318c0-.354.287-.641.641-.641h4.606c3.504 0 5.805 1.302 6.932 3.711.859 1.831.963 4.259-.565 6.716-1.364 2.18-3.544 2.746-5.937 2.746h-1.313v2.649a.641.641 0 0 1-.641.641zm.641-4.268h1.313c1.882 0 3.464-.548 4.597-1.727 1.152-1.2 1.385-2.994.77-4.507-.732-1.806-2.436-2.54-4.597-2.54H7.717v8.774zm12.247-9.809c-.131-.261-.524-.641-1.383-.641h-4.12v12.5h2.907v-5.136h1.313c1.201 0 2.18-.333 2.907-1.005.73-.673 1.092-1.612 1.092-2.816 0-1.204-.363-2.143-1.092-2.816-.727-.672-1.706-1.005-2.907-1.005h-1.313V7.336h2.907c.524 0 .916.131 1.201.393.284.261.524.719.655 1.179l1.774 6.393h3.023l-1.969-7.179z"
+                  />
+                </svg>
+                <div>
+                  <p class="font-medium">PayPal</p>
+                  <p class="text-sm text-gray-500">使用 PayPal 账户或银行卡</p>
+                </div>
+              </label>
             </div>
           </div>
         </div>
@@ -330,7 +409,7 @@
 
     <!-- Order Confirmation Dialog -->
     <TransitionRoot :show="showConfirmDialog" as="template">
-      <Dialog as="div" class="relative z-50" @close="showConfirmDialog = false">
+      <Dialog as="div" class="relative z-50" @close="closeConfirmDialog">
         <TransitionChild
           as="template"
           enter="ease-out duration-300"
@@ -357,31 +436,75 @@
               <DialogPanel
                 class="w-full max-w-md bg-white shadow-xl p-6 rounded-lg"
               >
-                <DialogTitle class="text-lg font-semibold mb-3"
-                  >确认订单</DialogTitle
-                >
-                <p class="text-gray-600 mb-6">
-                  您将支付
-                  <span class="font-bold text-dark"
-                    >${{ totalAmount.toFixed(2) }}</span
-                  >，确认下单吗？
-                </p>
-                <div class="flex justify-end gap-3">
-                  <button
-                    @click="showConfirmDialog = false"
-                    class="btn btn-outline"
-                    :disabled="isLoading"
+                <!-- 第一步：确认下单 -->
+                <template v-if="!createdOrderInDialog">
+                  <DialogTitle class="text-lg font-semibold mb-3"
+                    >确认订单</DialogTitle
                   >
-                    取消
-                  </button>
-                  <button
-                    @click="placeOrder"
-                    class="btn btn-primary"
-                    :disabled="isLoading"
+                  <p class="text-gray-600 mb-6">
+                    您将支付
+                    <span class="font-bold text-dark">{{
+                      totalAmount.toFixed(2)
+                    }}</span>
+                    美元，确认下单吗？
+                  </p>
+                  <div class="flex justify-end gap-3">
+                    <button
+                      @click="showConfirmDialog = false"
+                      class="btn btn-outline"
+                      :disabled="isLoading"
+                    >
+                      取消
+                    </button>
+                    <button
+                      @click="placeOrderThenPayInDialog"
+                      class="btn btn-primary"
+                      :disabled="isLoading"
+                    >
+                      {{ isLoading ? "创建订单中..." : "确认" }}
+                    </button>
+                  </div>
+                </template>
+
+                <!-- 第二步：弹窗内直接支付 -->
+                <template v-else>
+                  <DialogTitle class="text-lg font-semibold mb-2"
+                    >请完成支付</DialogTitle
                   >
-                    {{ isLoading ? "处理中..." : "确认" }}
+                  <p class="text-sm text-gray-500 mb-4">
+                    订单号 {{ createdOrderInDialog.orderNumber }} ·
+                    <span class="font-semibold text-dark"
+                      >${{
+                        Number(createdOrderInDialog.total).toFixed(2)
+                      }}</span
+                    >
+                  </p>
+                  <div class="min-h-[120px]">
+                    <StripePayment
+                      v-if="paymentMethod === 'stripe'"
+                      :key="'stripe-' + createdOrderInDialog.id"
+                      :order-id="createdOrderInDialog.id"
+                      :amount="createdOrderInDialog.total"
+                      @success="onPaymentSuccessInDialog"
+                      @error="onPaymentError"
+                    />
+                    <PayPalButton
+                      v-else
+                      :key="'paypal-' + createdOrderInDialog.id"
+                      :order-id="createdOrderInDialog.id"
+                      :amount="createdOrderInDialog.total"
+                      @success="onPaymentSuccessInDialog"
+                      @error="onPaymentError"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-outline w-full mt-4"
+                    @click="closeDialogAndGoPayLater"
+                  >
+                    稍后支付
                   </button>
-                </div>
+                </template>
               </DialogPanel>
             </TransitionChild>
           </div>
@@ -405,6 +528,8 @@ import {
 } from "@headlessui/vue";
 import { ShoppingBagIcon } from "@heroicons/vue/24/outline";
 import api from "@/api";
+import StripePayment from "@/components/payment/StripePayment.vue";
+import PayPalButton from "@/components/payment/PayPalButton.vue";
 
 const router = useRouter();
 const toast = useToast();
@@ -472,27 +597,68 @@ const handleImageError = (e) => {
   e.target.src = "/placeholder.jpg";
 };
 
+const paymentMethod = ref("paypal");
+const createdOrder = ref(null);
+/** 弹窗内创建好的订单，用于在弹窗里直接展示支付 */
+const createdOrderInDialog = ref(null);
+
 const confirmOrder = () => {
   if (!selectedAddress.value) {
     toast.warning("请选择收货地址");
     return;
   }
+  createdOrderInDialog.value = null;
   showConfirmDialog.value = true;
 };
 
-const placeOrder = async () => {
+/** 弹窗内点击「确认」：创建订单后不关弹窗，直接在弹窗内展示支付 */
+const placeOrderThenPayInDialog = async () => {
   isLoading.value = true;
   try {
     const res = await api.orders.create({ addressId: selectedAddress.value });
     cartStore.clearLocal();
-    showConfirmDialog.value = false;
-    toast.success("订单已提交");
-    router.push(`/order-success/${res.order.orderNumber}`);
+    createdOrderInDialog.value = res.order;
+    toast.success("订单已创建，请完成支付");
   } catch (e) {
     toast.error(e.message);
   } finally {
     isLoading.value = false;
   }
+};
+
+const onPaymentSuccessInDialog = (res) => {
+  const orderNumber = res?.orderNumber;
+  toast.success(res?.message || "支付成功");
+  showConfirmDialog.value = false;
+  createdOrderInDialog.value = null;
+  if (orderNumber) router.push(`/order-success/${orderNumber}`);
+};
+
+const closeDialogAndGoPayLater = () => {
+  const orderNumber = createdOrderInDialog.value?.orderNumber;
+  showConfirmDialog.value = false;
+  createdOrderInDialog.value = null;
+  if (orderNumber) router.push(`/order-success/${orderNumber}`);
+};
+
+/** 关闭弹窗（点击遮罩或 Esc）：若已创建订单则跳转订单成功页 */
+const closeConfirmDialog = () => {
+  if (createdOrderInDialog.value) {
+    router.push(`/order-success/${createdOrderInDialog.value.orderNumber}`);
+    createdOrderInDialog.value = null;
+  }
+  showConfirmDialog.value = false;
+};
+
+const onPaymentSuccess = (res) => {
+  toast.success(res?.message || "支付成功");
+  router.push(
+    `/order-success/${res?.orderNumber || createdOrder.value?.orderNumber}`
+  );
+};
+
+const onPaymentError = (err) => {
+  toast.error(err?.message || "支付失败，请重试");
 };
 
 onMounted(async () => {

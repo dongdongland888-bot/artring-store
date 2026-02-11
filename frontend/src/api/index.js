@@ -145,7 +145,11 @@ const api = {
   // 支付
   payments: {
     createIntent: (orderId) => http.post('/payments/create-payment-intent', { orderId }),
-    confirm: (data) => http.post('/payments/confirm', data)
+    confirm: (data) => http.post('/payments/confirm', data),
+    getStripePublishableKey: () => http.get('/payments/stripe-publishable-key'),
+    getPayPalClientId: () => http.get('/payments/paypal/client-id'),
+    createPayPalOrder: (orderId) => http.post('/payments/paypal/create-order', { orderId }),
+    capturePayPal: (data) => http.post('/payments/paypal/capture', data)
   },
 
   // 管理后台

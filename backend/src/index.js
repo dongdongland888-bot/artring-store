@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import Redis from 'ioredis';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // 路由导入
 import authRoutes from './routes/auth.js';
@@ -19,7 +21,18 @@ import adminRoutes from './routes/admin.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { requestLogger } from './middleware/logger.js';
 
-dotenv.config();
+// 根据 NODE_ENV 从项目根目录加载不同环境配置：
+// - test     → .env.test
+// - 其他环境 → .env.production
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({
+  path: path.resolve(
+    __dirname,
+    process.env.NODE_ENV === 'test' ? '../../.env.test' : '../../.env.production'
+  )
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;

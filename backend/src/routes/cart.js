@@ -64,16 +64,24 @@ router.post('/', authenticate, asyncHandler(async (req, res) => {
     }
   }
 
-  // 检查是否已存在
-  const existing = await prisma.cartItem.findUnique({
-    where: {
-      userId_productId_variantId: {
-        userId: req.user.id,
-        productId,
-        variantId: variantId || null
-      }
-    }
-  });
+  // 检查是否已存在（variantId 为 null 时 findUnique 不可用，改用 findFirst）
+  const existing = variantId != null
+    ? await prisma.cartItem.findUnique({
+        where: {
+          userId_productId_variantId: {
+            userId: req.user.id,
+            productId,
+            variantId
+          }
+        }
+      })
+    : await prisma.cartItem.findFirst({
+        where: {
+          userId: req.user.id,
+          productId,
+          variantId: null
+        }
+      });
 
   let cartItem;
   if (existing) {
