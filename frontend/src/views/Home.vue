@@ -13,14 +13,14 @@
       
       <div class="relative container-custom h-full flex items-center">
         <div class="max-w-xl text-white">
-          <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold leading-tight mb-4 sm:mb-6 animate-fade-in">
-            发现你的<br>独特风格
+          <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold leading-tight mb-4 sm:mb-6 animate-fade-in whitespace-pre-line">
+            {{ t('home.heroTitle') }}
           </h1>
           <p class="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 text-gray-200">
-            精选艺术戒指，每一枚都是独一无二的艺术品
+            {{ t('home.heroSubtitle') }}
           </p>
           <RouterLink to="/shop" class="btn btn-primary bg-white text-dark hover:bg-gray-100">
-            探索系列
+            {{ t('home.explore') }}
           </RouterLink>
         </div>
       </div>
@@ -43,7 +43,7 @@
           <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
           <div class="absolute inset-0 flex flex-col items-center justify-center text-white">
             <h3 class="text-2xl font-serif font-bold mb-2">{{ item.name }}</h3>
-            <span class="text-sm underline underline-offset-4">浏览系列</span>
+            <span class="text-sm underline underline-offset-4">{{ t('home.browseSeries') }}</span>
           </div>
         </RouterLink>
       </div>
@@ -52,9 +52,9 @@
     <!-- 新品上市 -->
     <section class="container-custom py-10 sm:py-16 lg:py-20">
       <div class="flex items-center justify-between mb-6 sm:mb-10">
-        <h2 class="text-2xl sm:text-3xl font-serif font-bold">新品上市</h2>
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold">{{ t('home.newArrivals') }}</h2>
         <RouterLink to="/shop?sort=newest" class="link">
-          查看全部 →
+          {{ t('home.viewAll') }}
         </RouterLink>
       </div>
       
@@ -81,18 +81,16 @@
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div class="order-2 lg:order-1">
             <h2 class="text-3xl lg:text-4xl font-serif font-bold mb-6">
-              关于 ArtRing
+              {{ t('home.aboutTitle') }}
             </h2>
             <p class="text-gray-600 leading-relaxed mb-6">
-              ArtRing 成立于 2020 年，致力于为现代人打造独特的艺术戒指。
-              我们相信，每一枚戒指都不仅仅是装饰品，更是个人风格和态度的表达。
+              {{ t('home.aboutText1') }}
             </p>
             <p class="text-gray-600 leading-relaxed mb-8">
-              我们与独立艺术家和工匠合作，采用优质材料，
-              以可持续的方式生产每一件作品。
+              {{ t('home.aboutText2') }}
             </p>
             <RouterLink to="/about" class="btn btn-outline">
-              了解更多
+              {{ t('home.learnMore') }}
             </RouterLink>
           </div>
           <div class="order-1 lg:order-2">
@@ -109,9 +107,9 @@
     <!-- 畅销商品 -->
     <section class="container-custom py-10 sm:py-16 lg:py-20">
       <div class="flex items-center justify-between mb-6 sm:mb-10">
-        <h2 class="text-2xl sm:text-3xl font-serif font-bold">畅销商品</h2>
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold">{{ t('home.bestsellers') }}</h2>
         <RouterLink to="/shop?sort=popular" class="link">
-          查看全部 →
+          {{ t('home.viewAll') }}
         </RouterLink>
       </div>
       
@@ -130,23 +128,23 @@
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
           <div>
             <TruckIcon class="w-8 h-8 mx-auto mb-4 text-accent-500" />
-            <h3 class="font-semibold mb-2">免费配送</h3>
-            <p class="text-sm text-gray-500">订单满 $100</p>
+            <h3 class="font-semibold mb-2">{{ t('home.freeShipping') }}</h3>
+            <p class="text-sm text-gray-500">{{ t('home.freeShippingDesc') }}</p>
           </div>
           <div>
             <ArrowPathIcon class="w-8 h-8 mx-auto mb-4 text-accent-500" />
-            <h3 class="font-semibold mb-2">30天退换</h3>
-            <p class="text-sm text-gray-500">无忧购物</p>
+            <h3 class="font-semibold mb-2">{{ t('home.returns30') }}</h3>
+            <p class="text-sm text-gray-500">{{ t('home.returns30Desc') }}</p>
           </div>
           <div>
             <ShieldCheckIcon class="w-8 h-8 mx-auto mb-4 text-accent-500" />
-            <h3 class="font-semibold mb-2">品质保证</h3>
-            <p class="text-sm text-gray-500">2年质保</p>
+            <h3 class="font-semibold mb-2">{{ t('home.quality') }}</h3>
+            <p class="text-sm text-gray-500">{{ t('home.qualityDesc') }}</p>
           </div>
           <div>
             <ChatBubbleLeftRightIcon class="w-8 h-8 mx-auto mb-4 text-accent-500" />
-            <h3 class="font-semibold mb-2">专业客服</h3>
-            <p class="text-sm text-gray-500">随时为您服务</p>
+            <h3 class="font-semibold mb-2">{{ t('home.support') }}</h3>
+            <p class="text-sm text-gray-500">{{ t('home.supportDesc') }}</p>
           </div>
         </div>
       </div>
@@ -156,7 +154,7 @@
     <section class="py-10 sm:py-16 lg:py-20">
       <div class="text-center mb-6 sm:mb-10">
         <h2 class="text-2xl sm:text-3xl font-serif font-bold mb-2">@ArtRing</h2>
-        <p class="text-gray-500">关注我们的 Instagram</p>
+        <p class="text-gray-500">{{ t('home.instagram') }}</p>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
         <a 
@@ -171,7 +169,7 @@
             class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
           >
           <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <span class="text-white">查看</span>
+            <span class="text-white">{{ t('home.viewPhoto') }}</span>
           </div>
         </a>
       </div>
@@ -180,7 +178,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { 
   TruckIcon, 
   ArrowPathIcon, 
@@ -190,27 +189,16 @@ import {
 import ProductCard from '@/components/product/ProductCard.vue'
 import api from '@/api'
 
+const { t } = useI18n()
 const isLoading = ref(true)
 const newProducts = ref([])
 const bestSellers = ref([])
 
-const featuredCategories = [
-  {
-    name: '简约系列',
-    slug: 'minimal',
-    image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80'
-  },
-  {
-    name: '复古系列',
-    slug: 'vintage',
-    image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80'
-  },
-  {
-    name: '艺术系列',
-    slug: 'artistic',
-    image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80'
-  }
-]
+const featuredCategories = computed(() => [
+  { name: t('home.featuredMinimal'), slug: 'minimal', image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80' },
+  { name: t('home.featuredVintage'), slug: 'vintage', image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80' },
+  { name: t('home.featuredArtistic'), slug: 'artistic', image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80' }
+])
 
 onMounted(async () => {
   try {

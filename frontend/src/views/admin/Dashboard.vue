@@ -1,13 +1,13 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-6">仪表盘</h1>
+    <h1 class="text-2xl font-bold mb-6">{{ t('admin.dashboard') }}</h1>
 
     <!-- Loading -->
     <div v-if="isLoading" class="text-center py-20">
       <div
         class="w-10 h-10 border-3 border-gray-300 border-t-dark rounded-full animate-spin mx-auto mb-4"
       ></div>
-      <p class="text-gray-400">加载中...</p>
+      <p class="text-gray-400">{{ t('admin.loading') }}</p>
     </div>
 
     <!-- Stats -->
@@ -25,27 +25,17 @@
     <!-- Recent Orders -->
     <div class="bg-white rounded-lg shadow-sm">
       <div class="px-6 py-4 border-b">
-        <h2 class="font-semibold">最近订单</h2>
+        <h2 class="font-semibold">{{ t('admin.recentOrders') }}</h2>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-gray-50">
             <tr>
-              <th class="text-left px-6 py-3 font-medium text-gray-500">
-                订单号
-              </th>
-              <th class="text-left px-6 py-3 font-medium text-gray-500">
-                客户
-              </th>
-              <th class="text-left px-6 py-3 font-medium text-gray-500">
-                金额
-              </th>
-              <th class="text-left px-6 py-3 font-medium text-gray-500">
-                状态
-              </th>
-              <th class="text-left px-6 py-3 font-medium text-gray-500">
-                时间
-              </th>
+              <th class="text-left px-6 py-3 font-medium text-gray-500">{{ t('admin.orderNumber') }}</th>
+              <th class="text-left px-6 py-3 font-medium text-gray-500">{{ t('admin.customer') }}</th>
+              <th class="text-left px-6 py-3 font-medium text-gray-500">{{ t('admin.amount') }}</th>
+              <th class="text-left px-6 py-3 font-medium text-gray-500">{{ t('admin.status') }}</th>
+              <th class="text-left px-6 py-3 font-medium text-gray-500">{{ t('admin.time') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y">
@@ -54,15 +44,9 @@
               :key="order.id"
               class="hover:bg-gray-50"
             >
-              <td class="px-6 py-3 font-mono text-xs">
-                {{ order.orderNumber }}
-              </td>
-              <td class="px-6 py-3">
-                {{ order.user?.firstName || order.user?.email }}
-              </td>
-              <td class="px-6 py-3">
-                ${{ parseFloat(order.total).toFixed(2) }}
-              </td>
+              <td class="px-6 py-3 font-mono text-xs">{{ order.orderNumber }}</td>
+              <td class="px-6 py-3">{{ order.user?.firstName || order.user?.email }}</td>
+              <td class="px-6 py-3">${{ parseFloat(order.total).toFixed(2) }}</td>
               <td class="px-6 py-3">
                 <span
                   class="inline-flex px-2 py-0.5 text-xs rounded-full"
@@ -71,14 +55,10 @@
                   {{ statusLabel(order.status) }}
                 </span>
               </td>
-              <td class="px-6 py-3 text-gray-500">
-                {{ formatDate(order.createdAt) }}
-              </td>
+              <td class="px-6 py-3 text-gray-500">{{ formatDate(order.createdAt) }}</td>
             </tr>
             <tr v-if="recentOrders.length === 0">
-              <td colspan="5" class="px-6 py-8 text-center text-gray-400">
-                暂无订单
-              </td>
+              <td colspan="5" class="px-6 py-8 text-center text-gray-400">{{ t('admin.noOrders') }}</td>
             </tr>
           </tbody>
         </table>
@@ -89,26 +69,27 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import api from "@/api";
 
+const { t } = useI18n();
 const stats = ref([]);
 const recentOrders = ref([]);
 const isLoading = ref(true);
 
 const statusMap = {
-  PENDING: { label: "待处理", cls: "bg-yellow-100 text-yellow-700" },
-  CONFIRMED: { label: "已确认", cls: "bg-blue-100 text-blue-700" },
-  PROCESSING: { label: "处理中", cls: "bg-indigo-100 text-indigo-700" },
-  SHIPPED: { label: "已发货", cls: "bg-purple-100 text-purple-700" },
-  DELIVERED: { label: "已送达", cls: "bg-green-100 text-green-700" },
-  CANCELLED: { label: "已取消", cls: "bg-gray-100 text-gray-700" },
-  REFUNDED: { label: "已退款", cls: "bg-red-100 text-red-700" },
+  PENDING: { key: "pending", cls: "bg-yellow-100 text-yellow-700" },
+  CONFIRMED: { key: "confirmed", cls: "bg-blue-100 text-blue-700" },
+  PROCESSING: { key: "processing", cls: "bg-indigo-100 text-indigo-700" },
+  SHIPPED: { key: "shipped", cls: "bg-purple-100 text-purple-700" },
+  DELIVERED: { key: "delivered", cls: "bg-green-100 text-green-700" },
+  CANCELLED: { key: "cancelled", cls: "bg-gray-100 text-gray-700" },
+  REFUNDED: { key: "refunded", cls: "bg-red-100 text-red-700" },
 };
-
-const statusLabel = (s) => statusMap[s]?.label || s;
+const statusLabel = (s) => (statusMap[s] ? t("admin." + statusMap[s].key) : s);
 const statusClass = (s) => statusMap[s]?.cls || "bg-gray-100 text-gray-700";
 const formatDate = (d) =>
-  new Date(d).toLocaleDateString("zh-CN", {
+  new Date(d).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -120,12 +101,12 @@ onMounted(async () => {
     const data = await api.admin.dashboard();
     const s = data.stats;
     stats.value = [
-      { label: "商品总数", value: s.totalProducts },
-      { label: "订单总数", value: s.totalOrders },
-      { label: "用户总数", value: s.totalUsers },
-      { label: "今日订单", value: s.todayOrders },
-      { label: "总收入", value: "$" + parseFloat(s.totalRevenue).toFixed(2) },
-      { label: "待处理订单", value: s.pendingOrders },
+      { label: t("admin.totalProducts"), value: s.totalProducts },
+      { label: t("admin.totalOrders"), value: s.totalOrders },
+      { label: t("admin.totalUsers"), value: s.totalUsers },
+      { label: t("admin.todayOrders"), value: s.todayOrders },
+      { label: t("admin.totalRevenue"), value: "$" + parseFloat(s.totalRevenue).toFixed(2) },
+      { label: t("admin.pendingOrders"), value: s.pendingOrders },
     ];
     recentOrders.value = data.recentOrders;
   } catch (e) {

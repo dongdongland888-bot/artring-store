@@ -1,7 +1,6 @@
 <template>
   <div class="paypal-wrap">
-    <p class="text-sm font-medium text-gray-700 mb-3">使用 PayPal 支付</p>
-    <!-- 容器始终挂载，保证 paypalHostRef 存在以便 SDK 能渲染 -->
+    <p class="text-sm font-medium text-gray-700 mb-3">{{ t('payment.payWithPayPal') }}</p>
     <div ref="containerRef" class="paypal-button-container">
       <div v-show="loading" class="paypal-loading">
         <div
@@ -12,11 +11,11 @@
         v-show="!loading"
         type="button"
         class="paypal-trigger-btn"
-        aria-label="确定支付"
+        :aria-label="t('payment.paypalConfirm')"
         :disabled="disabled"
         @click="triggerPayPalClick"
       >
-        确定支付
+        {{ t('payment.paypalConfirm') }}
       </button>
       <!-- PayPal SDK 渲染在此，需有宽高 SDK 才渲染，用样式移出视口 -->
       <div ref="paypalHostRef" class="paypal-host" aria-hidden="true" />
@@ -26,11 +25,11 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, nextTick } from "vue";
+import { useI18n } from "vue-i18n";
 import { loadScript } from "@paypal/paypal-js";
 import api from "@/api";
 
-const PAYPAL_NOT_CONFIGURED_MSG =
-  "未配置 PayPal Client ID，请在后端 .env 中设置 PAYPAL_CLIENT_ID";
+const { t, locale } = useI18n();
 
 const props = defineProps({
   /** 本系统订单 ID */
@@ -57,7 +56,7 @@ async function initButtons() {
   }
   if (!clientId) {
     loading.value = false;
-    emit("error", new Error(PAYPAL_NOT_CONFIGURED_MSG));
+    emit("error", new Error(t("payment.paypalNotConfigured")));
     return;
   }
   const host = paypalHostRef.value;
@@ -65,11 +64,12 @@ async function initButtons() {
     loading.value = false;
     return;
   }
+  const localeMap = { en: "en_US", "zh-CN": "zh_CN", "zh-TW": "zh_TW", vi: "vi_VN" };
   try {
     const paypal = await loadScript({
       clientId,
       currency: "USD",
-      locale: "zh_CN",
+      locale: localeMap[locale.value] || "en_US",
     });
     if (!paypal.Buttons) return;
     paypal
@@ -94,7 +94,7 @@ async function initButtons() {
               paypalOrderId: data.orderID,
             });
             if (res.success) emit("success", res);
-            else emit("error", new Error(res.message || "支付未完成"));
+            else emit("error", new Error(res.message || t("payment.payIncomplete")));
           } catch (e) {
             emit("error", e);
           }

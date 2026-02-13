@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-2xl font-serif font-bold mb-6">我的订单</h1>
+    <h1 class="text-2xl font-serif font-bold mb-6">{{ t('account.orders') }}</h1>
 
     <div v-if="isLoading" class="space-y-4">
       <div
@@ -28,20 +28,20 @@
           </div>
           <p class="text-sm text-gray-500">
             {{ new Date(order.createdAt).toLocaleDateString() }} ·
-            {{ order.items.length }} 件商品 · ${{ order.total }}
+            {{ t('account.itemsCount', { count: order.items.length }) }} · ${{ order.total }}
           </p>
           <p class="mt-1 flex items-center gap-2">
             <span
               v-if="order.paymentStatus === 'UNPAID'"
               class="text-xs px-2 py-0.5 rounded bg-red-50 text-red-600"
             >
-              待支付
+              {{ t('account.unpaid') }}
             </span>
             <span
               v-else
               class="text-xs px-2 py-0.5 rounded bg-green-50 text-green-600"
             >
-              已支付
+              {{ t('account.paid') }}
             </span>
           </p>
         </RouterLink>
@@ -51,15 +51,15 @@
             class="btn btn-primary text-sm"
             @click.stop.prevent="openPayModal(order)"
           >
-            立即支付
+            {{ t('account.payNow') }}
           </button>
         </div>
       </div>
     </div>
 
     <div v-else class="text-center py-12">
-      <p class="text-gray-500 mb-4">暂无订单</p>
-      <RouterLink to="/shop" class="btn btn-primary">去购物</RouterLink>
+      <p class="text-gray-500 mb-4">{{ t('account.noOrders') }}</p>
+      <RouterLink to="/shop" class="btn btn-primary">{{ t('cart.goShopping') }}</RouterLink>
     </div>
 
     <PaymentModal
@@ -73,10 +73,12 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useToast } from "vue-toastification";
 import api from "@/api";
 import PaymentModal from "@/components/payment/PaymentModal.vue";
 
+const { t } = useI18n();
 const toast = useToast();
 const isLoading = ref(true);
 const orders = ref([]);
@@ -89,7 +91,7 @@ function openPayModal(order) {
 }
 
 function onPaymentSuccess(res) {
-  toast.success(res?.message || "支付成功");
+  toast.success(res?.message || t("checkout.paySuccess"));
   const orderNumber = res?.orderNumber;
   if (orderNumber) {
     const o = orders.value.find((x) => x.orderNumber === orderNumber);
@@ -98,7 +100,7 @@ function onPaymentSuccess(res) {
 }
 
 function onPaymentError(err) {
-  toast.error(err?.message || "支付失败，请重试");
+  toast.error(err?.message || t("checkout.payFailedRetry"));
 }
 
 onMounted(async () => {
@@ -114,12 +116,12 @@ onMounted(async () => {
 
 const statusText = (s) =>
   ({
-    PENDING: "待处理",
-    CONFIRMED: "已确认",
-    PROCESSING: "处理中",
-    SHIPPED: "已发货",
-    DELIVERED: "已送达",
-    CANCELLED: "已取消",
+    PENDING: t("account.orderStatusPending"),
+    CONFIRMED: t("account.orderStatusConfirmed"),
+    PROCESSING: t("account.orderStatusProcessing"),
+    SHIPPED: t("account.orderStatusShipped"),
+    DELIVERED: t("account.orderStatusDelivered"),
+    CANCELLED: t("account.orderStatusCancelled"),
   }[s] || s);
 
 const statusClass = (s) =>

@@ -9,14 +9,14 @@
 
         <!-- 导航链接 (桌面端) -->
         <div class="hidden lg:flex items-center space-x-8">
-          <RouterLink to="/shop" class="nav-link">全部商品</RouterLink>
+          <RouterLink to="/shop" class="nav-link">{{ t('nav.shop') }}</RouterLink>
           <div 
             class="relative group"
             @mouseenter="showCategories = true"
             @mouseleave="showCategories = false"
           >
             <button class="nav-link flex items-center">
-              分类
+              {{ t('nav.categories') }}
               <ChevronDownIcon class="w-4 h-4 ml-1" />
             </button>
             <transition name="fade">
@@ -32,21 +32,50 @@
                 >
                   {{ category.name }}
                 </RouterLink>
-                <p v-if="categories.length === 0" class="px-6 py-2 text-sm text-gray-400">暂无分类</p>
+                <p v-if="categories.length === 0" class="px-6 py-2 text-sm text-gray-400">{{ t('nav.noCategories') }}</p>
               </div>
             </transition>
           </div>
-          <RouterLink to="/about" class="nav-link">关于我们</RouterLink>
-          <RouterLink to="/contact" class="nav-link">联系我们</RouterLink>
+          <RouterLink to="/about" class="nav-link">{{ t('nav.about') }}</RouterLink>
+          <RouterLink to="/contact" class="nav-link">{{ t('nav.contact') }}</RouterLink>
         </div>
 
         <!-- 右侧图标 -->
         <div class="flex items-center space-x-2 sm:space-x-4">
+          <!-- 语言切换 -->
+          <div class="relative" ref="langMenuRef">
+            <button 
+              @click="showLangMenu = !showLangMenu"
+              class="p-2 hover:bg-gray-100 rounded-full transition-colors text-lg leading-none"
+              :title="currentLocaleName"
+              aria-label="Language"
+            >
+              {{ currentLocaleFlag }}
+            </button>
+            <transition name="fade">
+              <div 
+                v-if="showLangMenu"
+                class="absolute right-0 top-full mt-1 bg-white shadow-lg border border-gray-100 py-2 min-w-[140px] rounded-lg z-50"
+              >
+                <button 
+                  v-for="loc in supportedLocales" 
+                  :key="loc.code"
+                  @click="selectLocale(loc.code)"
+                  class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-left text-sm"
+                  :class="{ 'bg-gray-50 font-medium': locale === loc.code }"
+                >
+                  <span>{{ loc.flag }}</span>
+                  <span>{{ loc.name }}</span>
+                </button>
+              </div>
+            </transition>
+          </div>
+
           <!-- 搜索按钮 -->
           <button 
             @click="showSearch = true"
             class="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            aria-label="搜索"
+            :aria-label="t('nav.searchAria')"
           >
             <MagnifyingGlassIcon class="w-5 h-5" />
           </button>
@@ -56,7 +85,7 @@
             <button 
               @click="showUserMenu = !showUserMenu"
               class="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              aria-label="用户菜单"
+              :aria-label="t('nav.userMenuAria')"
             >
               <UserIcon class="w-5 h-5" />
             </button>
@@ -66,28 +95,28 @@
                 class="absolute right-0 top-full mt-1 bg-white shadow-lg border border-gray-100 py-2 min-w-[160px] rounded-lg"
               >
                 <RouterLink v-if="authStore.isAdmin" to="/admin" class="block px-4 py-2 hover:bg-gray-50 text-blue-600 font-medium">
-                  管理后台
+                  {{ t('nav.admin') }}
                 </RouterLink>
                 <RouterLink to="/account" class="block px-4 py-2 hover:bg-gray-50">
-                  我的账户
+                  {{ t('nav.myAccount') }}
                 </RouterLink>
                 <RouterLink to="/account/orders" class="block px-4 py-2 hover:bg-gray-50">
-                  我的订单
+                  {{ t('nav.myOrders') }}
                 </RouterLink>
                 <RouterLink to="/account/wishlist" class="block px-4 py-2 hover:bg-gray-50">
-                  我的收藏
+                  {{ t('nav.myWishlist') }}
                 </RouterLink>
                 <hr class="my-2">
                 <button 
                   @click="handleLogout"
                   class="w-full text-left px-4 py-2 hover:bg-gray-50 text-red-600"
                 >
-                  退出登录
+                  {{ t('nav.logout') }}
                 </button>
               </div>
             </transition>
           </div>
-          <RouterLink v-else to="/login" class="p-2 hover:bg-gray-100 rounded-full transition-colors" aria-label="登录">
+          <RouterLink v-else to="/login" class="p-2 hover:bg-gray-100 rounded-full transition-colors" :aria-label="t('nav.loginAria')">
             <UserIcon class="w-5 h-5" />
           </RouterLink>
 
@@ -95,7 +124,7 @@
           <button 
             @click="cartStore.toggleCart()"
             class="p-2 hover:bg-gray-100 rounded-full transition-colors relative"
-            aria-label="购物车"
+            :aria-label="t('nav.cartAria')"
           >
             <ShoppingBagIcon class="w-5 h-5" />
             <span 
@@ -110,7 +139,7 @@
           <button 
             @click="showMobileMenu = true"
             class="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
-            aria-label="菜单"
+            :aria-label="t('nav.menuAria')"
           >
             <Bars3Icon class="w-6 h-6" />
           </button>
@@ -134,10 +163,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
+import { setLocale, supportedLocales } from '@/i18n'
 import api from '@/api'
 import {
   MagnifyingGlassIcon,
@@ -149,6 +180,7 @@ import {
 import MobileMenu from './MobileMenu.vue'
 import SearchModal from '@/components/layout/SearchModal.vue'
 
+const { t, locale } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
@@ -156,15 +188,28 @@ const cartStore = useCartStore()
 
 const showCategories = ref(false)
 const showUserMenu = ref(false)
+const showLangMenu = ref(false)
 const showMobileMenu = ref(false)
 const showSearch = ref(false)
 const categories = ref([])
 const userMenuRef = ref(null)
+const langMenuRef = ref(null)
 
-// 点击外部关闭用户菜单
+const currentLocaleName = computed(() => supportedLocales.find((l) => l.code === locale.value)?.name ?? locale.value)
+const currentLocaleFlag = computed(() => supportedLocales.find((l) => l.code === locale.value)?.flag ?? '🌐')
+
+function selectLocale(code) {
+  setLocale(code)
+  showLangMenu.value = false
+}
+
+// 点击外部关闭用户菜单 / 语言菜单
 const handleClickOutside = (event) => {
   if (userMenuRef.value && !userMenuRef.value.contains(event.target)) {
     showUserMenu.value = false
+  }
+  if (langMenuRef.value && !langMenuRef.value.contains(event.target)) {
+    showLangMenu.value = false
   }
 }
 
@@ -189,6 +234,7 @@ onUnmounted(() => {
 // 路由切换时关闭所有菜单
 watch(() => route.fullPath, () => {
   showUserMenu.value = false
+  showLangMenu.value = false
   showCategories.value = false
   showMobileMenu.value = false
   showSearch.value = false

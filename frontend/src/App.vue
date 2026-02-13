@@ -2,11 +2,11 @@
   <div class="min-h-screen flex flex-col">
     <!-- 顶部公告栏 -->
     <div v-if="showAnnouncement" class="bg-dark text-white text-center py-2 text-sm relative">
-      <p>新会员首单享 15% OFF | 满 $100 免运费</p>
+      <p>{{ t('announcement.banner') }}</p>
       <button
         @click="showAnnouncement = false"
         class="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white p-1"
-        aria-label="关闭公告"
+        :aria-label="t('announcement.closeAria')"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -45,7 +45,7 @@
         v-if="showBackToTop"
         @click="scrollToTop"
         class="fixed bottom-6 right-6 z-40 w-10 h-10 bg-dark text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-colors"
-        aria-label="返回顶部"
+        :aria-label="t('backToTop')"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
@@ -57,11 +57,13 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterView, useRouter } from 'vue-router'
 import Navbar from '@/components/layout/Navbar.vue'
 import Footer from '@/components/layout/Footer.vue'
 import CartDrawer from '@/components/cart/CartDrawer.vue'
 
+const { t } = useI18n()
 const router = useRouter()
 
 // 公告栏

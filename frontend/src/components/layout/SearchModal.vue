@@ -34,7 +34,7 @@
                   ref="searchInput"
                   v-model="query"
                   type="text"
-                  placeholder="搜索商品..."
+                  :placeholder="t('common.search') + '...'"
                   class="flex-1 px-4 py-5 text-lg focus:outline-none"
                   @keyup.enter="search"
                 />
@@ -67,14 +67,12 @@
                 </RouterLink>
               </div>
 
-              <!-- 无结果 -->
               <div v-else-if="query && !isLoading" class="p-8 text-center text-gray-500">
-                未找到相关商品
+                {{ t('shop.noProducts') }}
               </div>
 
-              <!-- 热门搜索 -->
               <div v-else class="p-6">
-                <p class="text-sm text-gray-500 mb-3">热门搜索</p>
+                <p class="text-sm text-gray-500 mb-3">{{ t('shop.popularSearch') }}</p>
                 <div class="flex flex-wrap gap-2">
                   <button 
                     v-for="tag in hotTags"
@@ -96,6 +94,7 @@
 
 <script setup>
 import { ref, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   Dialog,
   DialogPanel,
@@ -104,6 +103,8 @@ import {
 } from '@headlessui/vue'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import api from '@/api'
+
+const { t } = useI18n()
 
 const props = defineProps({
   show: Boolean

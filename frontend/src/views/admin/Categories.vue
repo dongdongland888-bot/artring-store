@@ -1,18 +1,18 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-6">分类管理</h1>
+    <h1 class="text-2xl font-bold mb-6">{{ t('admin.categoryManagement') }}</h1>
 
     <!-- Add/Edit Form -->
     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
       <h2 class="font-semibold mb-4">
-        {{ editingId ? "编辑分类" : "添加分类" }}
+        {{ editingId ? t('admin.editCategory') : t('admin.addCategory') }}
       </h2>
       <form
         @submit.prevent="handleSubmit"
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end"
       >
         <div>
-          <label class="block text-sm font-medium mb-1">名称 *</label>
+          <label class="block text-sm font-medium mb-1">{{ t('admin.name') }} *</label>
           <input
             v-model="form.name"
             type="text"
@@ -31,11 +31,11 @@
           />
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">描述</label>
+          <label class="block text-sm font-medium mb-1">{{ t('admin.description') }}</label>
           <input v-model="form.description" type="text" class="input text-sm" />
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">排序</label>
+          <label class="block text-sm font-medium mb-1">{{ t('admin.sortOrder') }}</label>
           <input
             v-model.number="form.sortOrder"
             type="number"
@@ -48,7 +48,7 @@
             class="btn btn-primary text-sm flex-1"
             :disabled="isSaving"
           >
-            {{ editingId ? "保存" : "添加" }}
+            {{ editingId ? t('common.save') : t('admin.add') }}
           </button>
           <button
             v-if="editingId"
@@ -56,7 +56,7 @@
             @click="cancelEdit"
             class="btn btn-outline text-sm"
           >
-            取消
+            {{ t('common.cancel') }}
           </button>
         </div>
       </form>
@@ -67,20 +67,12 @@
       <table class="w-full text-sm">
         <thead class="bg-gray-50">
           <tr>
-            <th class="text-left px-6 py-3 font-medium text-gray-500">名称</th>
-            <th
-              class="text-left px-6 py-3 font-medium text-gray-500 hidden sm:table-cell"
-            >
-              Slug
-            </th>
-            <th
-              class="text-left px-6 py-3 font-medium text-gray-500 hidden md:table-cell"
-            >
-              描述
-            </th>
-            <th class="text-left px-6 py-3 font-medium text-gray-500">排序</th>
-            <th class="text-left px-6 py-3 font-medium text-gray-500">状态</th>
-            <th class="text-right px-6 py-3 font-medium text-gray-500">操作</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500">{{ t('admin.name') }}</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500 hidden sm:table-cell">Slug</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500 hidden md:table-cell">{{ t('admin.description') }}</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500">{{ t('admin.sortOrder') }}</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500">{{ t('admin.status') }}</th>
+            <th class="text-right px-6 py-3 font-medium text-gray-500">{{ t('admin.actions') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y">
@@ -104,7 +96,7 @@
                     : 'bg-gray-100 text-gray-500'
                 "
               >
-                {{ cat.isActive ? "启用" : "禁用" }}
+                {{ cat.isActive ? t('admin.enabled') : t('admin.disabled') }}
               </span>
             </td>
             <td class="px-6 py-3 text-right space-x-2">
@@ -112,21 +104,19 @@
                 @click="startEdit(cat)"
                 class="text-blue-600 hover:underline"
               >
-                编辑
+                {{ t('common.edit') }}
               </button>
               <button
                 @click="toggleActive(cat)"
                 class="hover:underline"
                 :class="cat.isActive ? 'text-orange-600' : 'text-green-600'"
               >
-                {{ cat.isActive ? "禁用" : "启用" }}
+                {{ cat.isActive ? t('admin.disabled') : t('admin.enabled') }}
               </button>
             </td>
           </tr>
           <tr v-if="categories.length === 0">
-            <td colspan="6" class="px-6 py-12 text-center text-gray-400">
-              暂无分类
-            </td>
+            <td colspan="6" class="px-6 py-12 text-center text-gray-400">{{ t('admin.noCategories') }}</td>
           </tr>
         </tbody>
       </table>
@@ -136,9 +126,11 @@
 
 <script setup>
 import { ref, reactive, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useToast } from "vue-toastification";
 import api from "@/api";
 
+const { t } = useI18n();
 const toast = useToast();
 const categories = ref([]);
 const editingId = ref(null);
@@ -189,10 +181,10 @@ const handleSubmit = async () => {
     };
     if (editingId.value) {
       await api.admin.updateCategory(editingId.value, data);
-      toast.success("分类已更新");
+      toast.success(t('admin.categoryUpdated'));
     } else {
       await api.admin.createCategory(data);
-      toast.success("分类已创建");
+      toast.success(t('admin.categoryCreated'));
     }
     resetForm();
     await fetchCategories();
@@ -204,13 +196,13 @@ const handleSubmit = async () => {
 };
 
 const toggleActive = async (cat) => {
-  const action = cat.isActive ? "禁用" : "启用";
-  if (!confirm(`确定要${action}该分类吗？`)) return;
+  const action = cat.isActive ? t('admin.disabled') : t('admin.enabled');
+  if (!confirm(t('admin.confirmToggleCategory', { action }))) return;
 
   try {
     await api.admin.updateCategory(cat.id, { isActive: !cat.isActive });
     cat.isActive = !cat.isActive;
-    toast.success(cat.isActive ? "已启用" : "已禁用");
+    toast.success(cat.isActive ? t('admin.userEnabled') : t('admin.userDisabled'));
   } catch (e) {
     toast.error(e.message);
   }

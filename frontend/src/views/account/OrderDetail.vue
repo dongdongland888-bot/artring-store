@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-2xl font-serif font-bold mb-6">订单详情</h1>
+    <h1 class="text-2xl font-serif font-bold mb-6">{{ t('account.orderDetail') }}</h1>
 
     <div v-if="isLoading" class="animate-pulse space-y-4">
       <div class="h-8 bg-gray-200 w-1/2"></div>
@@ -9,9 +9,9 @@
 
     <div v-else-if="order">
       <div class="mb-6">
-        <p class="text-gray-500">订单号: {{ order.orderNumber }}</p>
+        <p class="text-gray-500">{{ t('account.orderNumber') }}: {{ order.orderNumber }}</p>
         <p class="text-gray-500">
-          下单时间: {{ new Date(order.createdAt).toLocaleString() }}
+          {{ t('account.orderTime') }}: {{ new Date(order.createdAt).toLocaleString() }}
         </p>
         <p class="mt-2 flex items-center gap-3">
           <span class="px-2 py-1 text-sm" :class="statusClass">
@@ -21,19 +21,19 @@
             v-if="order.paymentStatus === 'UNPAID'"
             class="text-xs px-2 py-1 rounded bg-red-50 text-red-600"
           >
-            待支付
+            {{ t('account.unpaid') }}
           </span>
           <span
             v-else
             class="text-xs px-2 py-1 rounded bg-green-50 text-green-600"
           >
-            已支付
+            {{ t('account.paid') }}
           </span>
         </p>
       </div>
 
       <div class="border p-4 mb-6">
-        <h2 class="font-semibold mb-3">订单商品</h2>
+        <h2 class="font-semibold mb-3">{{ t('account.orderItems') }}</h2>
         <div
           v-for="item in order.items"
           :key="item.id"
@@ -56,7 +56,7 @@
 
       <div class="grid md:grid-cols-2 gap-6">
         <div class="border p-4">
-          <h2 class="font-semibold mb-3">收货地址</h2>
+          <h2 class="font-semibold mb-3">{{ t('account.shippingAddress') }}</h2>
           <p>
             {{ order.shippingAddress?.firstName }}
             {{ order.shippingAddress?.lastName }}
@@ -71,25 +71,25 @@
         </div>
 
         <div class="border p-4">
-          <h2 class="font-semibold mb-3">支付信息</h2>
-          <p>小计: ${{ order.subtotal }}</p>
-          <p>运费: ${{ order.shippingFee }}</p>
-          <p>折扣: -${{ order.discount }}</p>
-          <p class="font-semibold mt-2">总计: ${{ order.total }}</p>
+          <h2 class="font-semibold mb-3">{{ t('account.paymentInfo') }}</h2>
+          <p>{{ t('cart.subtotal') }}: ${{ order.subtotal }}</p>
+          <p>{{ t('cart.shipping') }}: ${{ order.shippingFee }}</p>
+          <p>{{ t('admin.discount') }}: -${{ order.discount }}</p>
+          <p class="font-semibold mt-2">{{ t('cart.total') }}: ${{ order.total }}</p>
 
           <div
             v-if="order.paymentStatus === 'UNPAID'"
             class="mt-4 space-y-3 border-t pt-4"
           >
             <p class="text-sm text-red-500 mb-3">
-              当前订单尚未支付，请点击下方按钮选择支付方式并完成支付。
+              {{ t('account.unpaidHint') }}
             </p>
             <button
               type="button"
               class="btn btn-primary"
               @click="showPaymentModal = true"
             >
-              立即支付
+              {{ t('account.payNow') }}
             </button>
           </div>
         </div>
@@ -107,11 +107,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import { useToast } from "vue-toastification";
 import api from "@/api";
 import PaymentModal from "@/components/payment/PaymentModal.vue";
 
+const { t } = useI18n();
 const route = useRoute();
 const toast = useToast();
 const isLoading = ref(true);
@@ -122,7 +124,7 @@ onMounted(async () => {
   try {
     order.value = await api.orders.get(route.params.orderNumber);
   } catch (e) {
-    toast.error(e?.message || "加载订单失败");
+    toast.error(e?.message || t("account.loadOrderFailed"));
   } finally {
     isLoading.value = false;
   }
@@ -130,12 +132,12 @@ onMounted(async () => {
 
 const statusText = computed(() => {
   const map = {
-    PENDING: "待处理",
-    CONFIRMED: "已确认",
-    PROCESSING: "处理中",
-    SHIPPED: "已发货",
-    DELIVERED: "已送达",
-    CANCELLED: "已取消",
+    PENDING: t("account.orderStatusPending"),
+    CONFIRMED: t("account.orderStatusConfirmed"),
+    PROCESSING: t("account.orderStatusProcessing"),
+    SHIPPED: t("account.orderStatusShipped"),
+    DELIVERED: t("account.orderStatusDelivered"),
+    CANCELLED: t("account.orderStatusCancelled"),
   };
   return map[order.value?.status] || "";
 });
@@ -152,13 +154,13 @@ const statusClass = computed(() => {
 });
 
 function onPaymentSuccess(res) {
-  toast.success(res?.message || "支付成功");
+  toast.success(res?.message || t("checkout.paySuccess"));
   if (order.value) {
     order.value.paymentStatus = "PAID";
   }
 }
 
 function onPaymentError(err) {
-  toast.error(err?.message || "支付失败，请重试");
+  toast.error(err?.message || t("checkout.payFailedRetry"));
 }
 </script>

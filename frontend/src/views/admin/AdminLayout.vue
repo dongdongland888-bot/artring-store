@@ -49,7 +49,7 @@
               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
             >
               <ArrowLeftIcon class="w-5 h-5" />
-              返回前台
+              {{ t('admin.backToStore') }}
             </RouterLink>
             <div class="px-3 py-2 text-xs text-gray-400">
               {{ authStore.user?.email }}
@@ -69,8 +69,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import {
   Bars3Icon,
@@ -83,16 +84,17 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
+const { t } = useI18n()
 const authStore = useAuthStore()
 const sidebarOpen = ref(false)
 
-const navItems = [
-  { path: '/admin', label: '仪表盘', icon: HomeIcon },
-  { path: '/admin/products', label: '商品管理', icon: CubeIcon },
-  { path: '/admin/orders', label: '订单管理', icon: ShoppingCartIcon },
-  { path: '/admin/users', label: '用户管理', icon: UsersIcon },
-  { path: '/admin/categories', label: '分类管理', icon: TagIcon }
-]
+const navItems = computed(() => [
+  { path: '/admin', label: t('admin.dashboard'), icon: HomeIcon },
+  { path: '/admin/products', label: t('admin.productManagement'), icon: CubeIcon },
+  { path: '/admin/orders', label: t('admin.orderManagement'), icon: ShoppingCartIcon },
+  { path: '/admin/users', label: t('admin.userManagement'), icon: UsersIcon },
+  { path: '/admin/categories', label: t('admin.categoryManagement'), icon: TagIcon }
+])
 
 const isActive = (path) => {
   if (path === '/admin') return route.path === '/admin'

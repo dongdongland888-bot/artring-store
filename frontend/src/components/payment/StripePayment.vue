@@ -7,7 +7,7 @@
     </div>
     <template v-else>
       <div ref="cardRef" class="p-4 border rounded-lg bg-gray-50" />
-      <p class="text-xs text-gray-500 mt-2">支持 Visa、Mastercard 等</p>
+      <p class="text-xs text-gray-500 mt-2">{{ t('payment.stripeSupport') }}</p>
       <button
         v-if="!hideSubmitButton"
         type="button"
@@ -15,7 +15,7 @@
         :disabled="paying"
         @click="submit"
       >
-        {{ paying ? "支付中..." : `支付 $${amount}` }}
+        {{ paying ? t('payment.paying') : t('payment.payAmount', { amount }) }}
       </button>
     </template>
   </div>
@@ -23,8 +23,11 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, nextTick } from "vue";
+import { useI18n } from "vue-i18n";
 import { loadStripe } from "@stripe/stripe-js";
 import api from "@/api";
+
+const { t } = useI18n();
 
 const props = defineProps({
   orderId: { type: String, required: true },
@@ -47,9 +50,9 @@ const clientSecretRef = ref(null);
 async function init() {
   try {
     const { publishableKey } = await api.payments.getStripePublishableKey();
-    if (!publishableKey) throw new Error("Stripe 未配置");
+    if (!publishableKey) throw new Error(t("payment.stripeNotConfigured"));
     const stripe = await loadStripe(publishableKey);
-    if (!stripe) throw new Error("Stripe 加载失败");
+    if (!stripe) throw new Error(t("payment.stripeLoadFailed"));
     const res = await api.payments.createIntent(props.orderId);
     clientSecretRef.value = res.clientSecret;
     stripeRef.value = stripe;
@@ -99,7 +102,7 @@ async function submit() {
       { payment_method: { card: cardElement } }
     );
     if (error) {
-      emit("error", new Error(error.message || "支付失败"));
+      emit("error", new Error(error.message || t("payment.payFailed")));
       return;
     }
     if (paymentIntent?.status === "succeeded") {
@@ -109,7 +112,7 @@ async function submit() {
       });
       emit("success", res);
     } else {
-      emit("error", new Error("支付未完成"));
+      emit("error", new Error(t("payment.payIncomplete")));
     }
   } catch (e) {
     emit("error", e);

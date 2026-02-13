@@ -1,28 +1,26 @@
 <template>
   <div class="container-custom py-8 sm:py-12">
     <h1 class="text-2xl sm:text-3xl font-serif font-bold mb-6 sm:mb-8">
-      购物车
+      {{ t('cart.title') }}
     </h1>
 
     <div v-if="cartStore.isEmpty" class="text-center py-16 sm:py-20">
       <ShoppingBagIcon
         class="w-16 sm:w-20 h-16 sm:h-20 text-gray-300 mx-auto mb-4"
       />
-      <p class="text-gray-500 mb-6">购物车是空的</p>
-      <RouterLink to="/shop" class="btn btn-primary">去购物</RouterLink>
+      <p class="text-gray-500 mb-6">{{ t('cart.empty') }}</p>
+      <RouterLink to="/shop" class="btn btn-primary">{{ t('cart.goShopping') }}</RouterLink>
     </div>
 
     <div v-else class="lg:flex gap-8 xl:gap-12">
-      <!-- 购物车列表 -->
       <div class="flex-1">
-        <!-- Desktop header -->
         <div
           class="border-b pb-4 mb-4 hidden md:grid grid-cols-12 gap-4 text-sm text-gray-500"
         >
-          <div class="col-span-6">商品</div>
-          <div class="col-span-2 text-center">单价</div>
-          <div class="col-span-2 text-center">数量</div>
-          <div class="col-span-2 text-right">小计</div>
+          <div class="col-span-6">{{ t('cart.product') }}</div>
+          <div class="col-span-2 text-center">{{ t('cart.price') }}</div>
+          <div class="col-span-2 text-center">{{ t('cart.quantity') }}</div>
+          <div class="col-span-2 text-right">{{ t('cart.subtotal') }}</div>
         </div>
 
         <div class="space-y-4 sm:space-y-6">
@@ -83,7 +81,7 @@
                     @click="cartStore.removeItem(item.id)"
                     class="text-xs text-red-500 hover:underline"
                   >
-                    删除
+                    {{ t('cart.remove') }}
                   </button>
                 </div>
               </div>
@@ -113,7 +111,7 @@
                     @click="cartStore.removeItem(item.id)"
                     class="text-sm text-red-500 hover:underline mt-2"
                   >
-                    删除
+                    {{ t('cart.remove') }}
                   </button>
                 </div>
               </div>
@@ -150,26 +148,25 @@
         </div>
       </div>
 
-      <!-- 结算区 -->
       <div class="lg:w-80 mt-6 lg:mt-0">
         <div class="bg-gray-50 p-5 sm:p-6 rounded-lg sticky top-24">
-          <h2 class="text-lg font-semibold mb-4">订单摘要</h2>
+          <h2 class="text-lg font-semibold mb-4">{{ t('cart.orderSummary') }}</h2>
 
           <div class="space-y-3 text-sm">
             <div class="flex justify-between">
-              <span class="text-gray-600">商品小计</span>
+              <span class="text-gray-600">{{ t('cart.subtotal') }}</span>
               <span>${{ cartStore.subtotal.toFixed(2) }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-gray-600">运费</span>
-              <span>{{ cartStore.subtotal >= 100 ? "免费" : "$10.00" }}</span>
+              <span class="text-gray-600">{{ t('cart.shipping') }}</span>
+              <span>{{ cartStore.subtotal >= 100 ? t('cart.free') : "$10.00" }}</span>
             </div>
           </div>
 
           <hr class="my-4" />
 
           <div class="flex justify-between text-lg font-semibold">
-            <span>总计</span>
+            <span>{{ t('cart.total') }}</span>
             <span
               >${{
                 (
@@ -183,14 +180,14 @@
             to="/checkout"
             class="block w-full btn btn-primary text-center mt-6"
           >
-            结算
+            {{ t('cart.checkout') }}
           </RouterLink>
 
           <RouterLink
             to="/shop"
             class="block w-full text-center text-sm text-gray-500 hover:underline mt-4"
           >
-            继续购物
+            {{ t('cart.continueShopping') }}
           </RouterLink>
         </div>
       </div>
@@ -199,9 +196,11 @@
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
 import { ShoppingBagIcon } from "@heroicons/vue/24/outline";
 import { useCartStore } from "@/stores/cart";
 
+const { t } = useI18n();
 const cartStore = useCartStore();
 
 const updateQty = (item, delta) => {

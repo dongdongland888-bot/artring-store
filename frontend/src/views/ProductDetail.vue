@@ -1,12 +1,9 @@
 <template>
   <div class="container-custom py-6 sm:py-12">
-    <!-- 面包屑 -->
     <nav class="mb-4 sm:mb-8 text-sm hidden sm:block">
-      <RouterLink to="/" class="text-gray-500 hover:text-dark">首页</RouterLink>
+      <RouterLink to="/" class="text-gray-500 hover:text-dark">{{ t('shop.home') }}</RouterLink>
       <span class="mx-2 text-gray-400">/</span>
-      <RouterLink to="/shop" class="text-gray-500 hover:text-dark"
-        >商品</RouterLink
-      >
+      <RouterLink to="/shop" class="text-gray-500 hover:text-dark">{{ t('product.productLabel') }}</RouterLink>
       <span class="mx-2 text-gray-400">/</span>
       <span>{{ product?.name }}</span>
     </nav>
@@ -94,9 +91,9 @@
               :class="i <= Math.round(product.avgRating) ? 'fill-current' : ''"
             />
           </div>
-          <span class="text-sm text-gray-500"
-            >{{ product.reviewCount }} 条评价</span
-          >
+          <span class="text-sm text-gray-500">
+            {{ t('product.reviewsCount', { count: product.reviewCount }) }}
+          </span>
         </div>
 
         <!-- 价格 -->
@@ -123,11 +120,10 @@
           {{ product.shortDesc || product.description }}
         </p>
 
-        <!-- 尺寸选择 -->
         <div v-if="sizes.length > 0" class="mb-6">
           <div class="flex items-center justify-between mb-3">
-            <span class="font-medium">尺寸</span>
-            <button class="text-sm text-gray-500 underline">尺寸指南</button>
+            <span class="font-medium">{{ t('product.size') }}</span>
+            <button class="text-sm text-gray-500 underline">{{ t('product.sizeGuide') }}</button>
           </div>
           <div class="flex flex-wrap gap-2">
             <button
@@ -149,9 +145,8 @@
           </div>
         </div>
 
-        <!-- 颜色选择 -->
         <div v-if="colors.length > 0" class="mb-8">
-          <span class="font-medium block mb-3">颜色: {{ selectedColor }}</span>
+          <span class="font-medium block mb-3">{{ t('product.color') }}: {{ selectedColor }}</span>
           <div class="flex gap-2">
             <button
               v-for="color in colors"
@@ -167,9 +162,8 @@
           </div>
         </div>
 
-        <!-- 数量 -->
         <div class="flex items-center gap-4 mb-8">
-          <span class="font-medium">数量</span>
+          <span class="font-medium">{{ t('product.quantity') }}</span>
           <div class="flex items-center border rounded">
             <button
               @click="quantity = Math.max(1, quantity - 1)"
@@ -208,43 +202,40 @@
             class="flex-1 btn btn-primary"
             :disabled="!canAddToCart"
           >
-            {{ canAddToCart ? "加入购物车" : "请选择规格" }}
+            {{ canAddToCart ? t('product.addToCart') : t('product.selectOption') }}
           </button>
           <button @click="toggleWishlist" class="btn btn-outline px-4">
             <HeartIcon class="w-5 h-5" />
           </button>
         </div>
 
-        <!-- 服务保障 -->
         <div class="border-t pt-6 space-y-3">
           <div class="flex items-center gap-3 text-sm text-gray-600">
             <TruckIcon class="w-5 h-5" />
-            <span>满 $100 免费配送</span>
+            <span>{{ t('home.freeShipping') }} {{ t('home.freeShippingDesc') }}</span>
           </div>
           <div class="flex items-center gap-3 text-sm text-gray-600">
             <ArrowPathIcon class="w-5 h-5" />
-            <span>30 天无忧退换</span>
+            <span>{{ t('home.returns30') }} {{ t('home.returns30Desc') }}</span>
           </div>
           <div class="flex items-center gap-3 text-sm text-gray-600">
             <ShieldCheckIcon class="w-5 h-5" />
-            <span>2 年质量保证</span>
+            <span>{{ t('home.quality') }} {{ t('home.qualityDesc') }}</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 商品详细描述 -->
     <section v-if="product?.description" class="mt-10 sm:mt-20">
       <h2 class="text-xl sm:text-2xl font-serif font-bold mb-4 sm:mb-6">
-        商品详情
+        {{ t('product.detailTitle') }}
       </h2>
       <div class="prose max-w-none" v-html="product.description"></div>
     </section>
 
-    <!-- 相关商品 -->
     <section v-if="relatedProducts.length > 0" class="mt-10 sm:mt-20">
       <h2 class="text-xl sm:text-2xl font-serif font-bold mb-4 sm:mb-8">
-        你可能也喜欢
+        {{ t('product.youMayLike') }}
       </h2>
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <ProductCard v-for="p in relatedProducts" :key="p.id" :product="p" />
@@ -255,8 +246,11 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import { useToast } from "vue-toastification";
+
+const { t } = useI18n();
 import {
   StarIcon,
   HeartIcon,

@@ -36,12 +36,12 @@
                     class="flex items-center justify-between px-6 py-4 border-b"
                   >
                     <DialogTitle class="text-lg font-semibold">
-                      购物车 ({{ cartStore.itemCount }})
+                      {{ t('cart.cartCount', { count: cartStore.itemCount }) }}
                     </DialogTitle>
                     <button
                       @click="cartStore.closeCart()"
                       class="p-2 hover:bg-gray-100 rounded-full"
-                      aria-label="关闭购物车"
+                      :aria-label="t('cart.closeAria')"
                     >
                       <XMarkIcon class="w-6 h-6" />
                     </button>
@@ -56,7 +56,7 @@
                       <div
                         class="w-8 h-8 border-2 border-gray-300 border-t-dark rounded-full animate-spin mx-auto mb-3"
                       ></div>
-                      <p class="text-sm text-gray-500">加载中...</p>
+                      <p class="text-sm text-gray-500">{{ t('common.loading') }}</p>
                     </div>
                   </div>
 
@@ -66,13 +66,13 @@
                     class="flex-1 flex flex-col items-center justify-center p-8"
                   >
                     <ShoppingBagIcon class="w-16 h-16 text-gray-300 mb-4" />
-                    <p class="text-gray-500 mb-6">购物车是空的</p>
+                    <p class="text-gray-500 mb-6">{{ t('cart.empty') }}</p>
                     <RouterLink
                       to="/shop"
                       class="btn btn-primary"
                       @click="cartStore.closeCart()"
                     >
-                      去购物
+                      {{ t('cart.goShopping') }}
                     </RouterLink>
                   </div>
 
@@ -135,7 +135,7 @@
                               :disabled="
                                 updatingItems.has(item.id) || item.quantity <= 1
                               "
-                              aria-label="减少数量"
+                              :aria-label="t('cart.decreaseQty')"
                             >
                               <MinusIcon class="w-3 h-3" />
                             </button>
@@ -146,7 +146,7 @@
                               @click="updateQty(item, 1)"
                               class="w-7 h-7 flex items-center justify-center border rounded hover:bg-gray-50 transition-colors"
                               :disabled="updatingItems.has(item.id)"
-                              aria-label="增加数量"
+                              :aria-label="t('cart.increaseQty')"
                             >
                               <PlusIcon class="w-3 h-3" />
                             </button>
@@ -158,7 +158,7 @@
                           @click="removeItem(item)"
                           class="self-start p-1.5 hover:bg-red-50 rounded transition-colors group"
                           :disabled="updatingItems.has(item.id)"
-                          aria-label="删除商品"
+                          :aria-label="t('cart.removeItem')"
                         >
                           <TrashIcon
                             class="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors"
@@ -174,25 +174,25 @@
                     class="border-t px-6 py-5 space-y-4"
                   >
                     <div class="flex justify-between items-baseline">
-                      <span class="text-base font-semibold">小计</span>
+                      <span class="text-base font-semibold">{{ t('cart.subtotal') }}</span>
                       <span class="text-lg font-bold"
                         >${{ cartStore.subtotal.toFixed(2) }}</span
                       >
                     </div>
-                    <p class="text-xs text-gray-500">运费将在结算时计算</p>
+                    <p class="text-xs text-gray-500">{{ t('cart.shippingAtCheckout') }}</p>
                     <RouterLink
                       to="/checkout"
                       class="block w-full btn btn-primary text-center"
                       @click="cartStore.closeCart()"
                     >
-                      结算
+                      {{ t('cart.checkout') }}
                     </RouterLink>
                     <RouterLink
                       to="/cart"
                       class="block w-full btn btn-outline text-center"
                       @click="cartStore.closeCart()"
                     >
-                      查看购物车
+                      {{ t('cart.viewCart') }}
                     </RouterLink>
                   </div>
                 </div>
@@ -207,6 +207,7 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import {
   Dialog,
   DialogPanel,
@@ -224,6 +225,7 @@ import {
 import { useCartStore } from "@/stores/cart";
 import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
 
+const { t } = useI18n();
 const cartStore = useCartStore();
 const updatingItems = ref(new Set());
 

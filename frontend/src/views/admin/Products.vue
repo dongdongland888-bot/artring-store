@@ -3,10 +3,8 @@
     <div
       class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6"
     >
-      <h1 class="text-2xl font-bold">商品管理</h1>
-      <RouterLink to="/admin/products/new" class="btn btn-primary text-sm"
-        >+ 添加商品</RouterLink
-      >
+      <h1 class="text-2xl font-bold">{{ t('admin.productManagement') }}</h1>
+      <RouterLink to="/admin/products/new" class="btn btn-primary text-sm">+ {{ t('admin.addProduct') }}</RouterLink>
     </div>
 
     <!-- Filters -->
@@ -16,7 +14,7 @@
       <input
         v-model="search"
         type="text"
-        placeholder="搜索商品名称..."
+        :placeholder="t('admin.searchProductPlaceholder')"
         class="input text-sm flex-1"
         @input="debouncedFetch"
       />
@@ -25,9 +23,9 @@
         class="input text-sm w-auto"
         @change="fetchProducts"
       >
-        <option value="">全部状态</option>
-        <option value="true">已上架</option>
-        <option value="false">已下架</option>
+        <option value="">{{ t('admin.allStatus') }}</option>
+        <option value="true">{{ t('admin.onSale') }}</option>
+        <option value="false">{{ t('admin.offSale') }}</option>
       </select>
     </div>
 
@@ -39,7 +37,7 @@
       <div
         class="w-10 h-10 border-3 border-gray-300 border-t-dark rounded-full animate-spin mx-auto mb-4"
       ></div>
-      <p class="text-gray-400">加载中...</p>
+      <p class="text-gray-400">{{ t('admin.loading') }}</p>
     </div>
 
     <!-- Table -->
@@ -47,20 +45,12 @@
       <table class="w-full text-sm">
         <thead class="bg-gray-50">
           <tr>
-            <th class="text-left px-6 py-3 font-medium text-gray-500">商品</th>
-            <th
-              class="text-left px-6 py-3 font-medium text-gray-500 hidden md:table-cell"
-            >
-              分类
-            </th>
-            <th class="text-left px-6 py-3 font-medium text-gray-500">价格</th>
-            <th
-              class="text-left px-6 py-3 font-medium text-gray-500 hidden sm:table-cell"
-            >
-              变体
-            </th>
-            <th class="text-left px-6 py-3 font-medium text-gray-500">状态</th>
-            <th class="text-right px-6 py-3 font-medium text-gray-500">操作</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500">{{ t('admin.product') }}</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500 hidden md:table-cell">{{ t('admin.category') }}</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500">{{ t('admin.price') }}</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500 hidden sm:table-cell">{{ t('admin.variants') }}</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500">{{ t('admin.status') }}</th>
+            <th class="text-right px-6 py-3 font-medium text-gray-500">{{ t('admin.operation') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y">
@@ -104,28 +94,25 @@
                     : 'bg-gray-100 text-gray-500'
                 "
               >
-                {{ product.isActive ? "上架" : "下架" }}
+                {{ product.isActive ? t('admin.productOnSale') : t('admin.productOffSale') }}
               </span>
             </td>
             <td class="px-6 py-3 text-right space-x-2">
               <RouterLink
                 :to="`/admin/products/${product.id}/edit`"
                 class="text-blue-600 hover:underline"
-                >编辑</RouterLink
-              >
+              >{{ t('admin.edit') }}</RouterLink>
               <button
                 @click="toggleActive(product)"
                 class="hover:underline"
                 :class="product.isActive ? 'text-orange-600' : 'text-green-600'"
               >
-                {{ product.isActive ? "下架" : "上架" }}
+                {{ product.isActive ? t('admin.productOffSale') : t('admin.productOnSale') }}
               </button>
             </td>
           </tr>
           <tr v-if="products.length === 0 && !isLoading">
-            <td colspan="6" class="px-6 py-12 text-center text-gray-400">
-              暂无商品
-            </td>
+            <td colspan="6" class="px-6 py-12 text-center text-gray-400">{{ t('admin.noProducts') }}</td>
           </tr>
         </tbody>
       </table>
@@ -151,9 +138,11 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useToast } from "vue-toastification";
 import api from "@/api";
 
+const { t } = useI18n();
 const toast = useToast();
 const products = ref([]);
 const isLoading = ref(false);
@@ -189,14 +178,14 @@ const fetchProducts = async () => {
 };
 
 const toggleActive = async (product) => {
-  const action = product.isActive ? "下架" : "上架";
-  if (!confirm(`确定要${action}该商品吗？`)) return;
+  const action = product.isActive ? t('admin.productOffSale') : t('admin.productOnSale');
+  if (!confirm(t('admin.confirmToggle', { action }))) return;
 
   updatingIds.value.add(product.id);
   try {
     await api.admin.updateProduct(product.id, { isActive: !product.isActive });
     product.isActive = !product.isActive;
-    toast.success(product.isActive ? "已上架" : "已下架");
+    toast.success(product.isActive ? t('admin.productOnSale') : t('admin.productOffSale'));
   } catch (e) {
     toast.error(e.message);
   } finally {

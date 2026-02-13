@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-6">用户管理</h1>
+    <h1 class="text-2xl font-bold mb-6">{{ t('admin.userManagement') }}</h1>
 
     <!-- Filters -->
     <div
@@ -9,7 +9,7 @@
       <input
         v-model="search"
         type="text"
-        placeholder="搜索邮箱或姓名..."
+        :placeholder="t('admin.searchUserPlaceholder')"
         class="input text-sm flex-1"
         @input="debouncedFetch"
       />
@@ -18,10 +18,10 @@
         class="input text-sm w-auto"
         @change="fetchUsers"
       >
-        <option value="">全部角色</option>
-        <option value="CUSTOMER">客户</option>
-        <option value="ADMIN">管理员</option>
-        <option value="SUPER_ADMIN">超级管理员</option>
+        <option value="">{{ t('admin.allRoles') }}</option>
+        <option value="CUSTOMER">{{ t('admin.roleCustomer') }}</option>
+        <option value="ADMIN">{{ t('admin.roleAdmin') }}</option>
+        <option value="SUPER_ADMIN">{{ t('admin.roleSuperAdmin') }}</option>
       </select>
     </div>
 
@@ -33,7 +33,7 @@
       <div
         class="w-10 h-10 border-3 border-gray-300 border-t-dark rounded-full animate-spin mx-auto mb-4"
       ></div>
-      <p class="text-gray-400">加载中...</p>
+      <p class="text-gray-400">{{ t('admin.loading') }}</p>
     </div>
 
     <!-- Table -->
@@ -41,24 +41,12 @@
       <table class="w-full text-sm">
         <thead class="bg-gray-50">
           <tr>
-            <th class="text-left px-6 py-3 font-medium text-gray-500">用户</th>
-            <th
-              class="text-left px-6 py-3 font-medium text-gray-500 hidden sm:table-cell"
-            >
-              角色
-            </th>
-            <th
-              class="text-left px-6 py-3 font-medium text-gray-500 hidden md:table-cell"
-            >
-              订单数
-            </th>
-            <th class="text-left px-6 py-3 font-medium text-gray-500">状态</th>
-            <th
-              class="text-left px-6 py-3 font-medium text-gray-500 hidden lg:table-cell"
-            >
-              注册时间
-            </th>
-            <th class="text-right px-6 py-3 font-medium text-gray-500">操作</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500">{{ t('admin.userColumn') }}</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500 hidden sm:table-cell">{{ t('admin.roleColumn') }}</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500 hidden md:table-cell">{{ t('admin.orderCount') }}</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500">{{ t('admin.status') }}</th>
+            <th class="text-left px-6 py-3 font-medium text-gray-500 hidden lg:table-cell">{{ t('admin.registeredAt') }}</th>
+            <th class="text-right px-6 py-3 font-medium text-gray-500">{{ t('admin.actions') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y">
@@ -94,7 +82,7 @@
                     : 'bg-red-100 text-red-700'
                 "
               >
-                {{ user.isActive ? "活跃" : "禁用" }}
+                {{ user.isActive ? t('admin.active') : t('admin.disabled') }}
               </span>
             </td>
             <td class="px-6 py-3 hidden lg:table-cell text-gray-500">
@@ -106,22 +94,20 @@
                 @change="updateRole(user, $event.target.value)"
                 class="text-xs border rounded px-1 py-0.5"
               >
-                <option value="CUSTOMER">客户</option>
-                <option value="ADMIN">管理员</option>
+                <option value="CUSTOMER">{{ t('admin.roleCustomer') }}</option>
+                <option value="ADMIN">{{ t('admin.roleAdmin') }}</option>
               </select>
               <button
                 @click="toggleActive(user)"
                 class="hover:underline text-sm"
                 :class="user.isActive ? 'text-red-600' : 'text-green-600'"
               >
-                {{ user.isActive ? "禁用" : "启用" }}
+                {{ user.isActive ? t('admin.disabled') : t('admin.enabled') }}
               </button>
             </td>
           </tr>
           <tr v-if="users.length === 0">
-            <td colspan="6" class="px-6 py-12 text-center text-gray-400">
-              暂无用户
-            </td>
+            <td colspan="6" class="px-6 py-12 text-center text-gray-400">{{ t('admin.noUsers') }}</td>
           </tr>
         </tbody>
       </table>
@@ -147,9 +133,11 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useToast } from "vue-toastification";
 import api from "@/api";
 
+const { t } = useI18n();
 const toast = useToast();
 const users = ref([]);
 const isLoading = ref(false);
@@ -160,13 +148,13 @@ const page = ref(1);
 const pagination = ref({ pages: 1 });
 
 const roleMap = {
-  CUSTOMER: { label: "客户", cls: "bg-gray-100 text-gray-700" },
-  ADMIN: { label: "管理员", cls: "bg-blue-100 text-blue-700" },
-  SUPER_ADMIN: { label: "超级管理员", cls: "bg-purple-100 text-purple-700" },
+  CUSTOMER: { key: "roleCustomer", cls: "bg-gray-100 text-gray-700" },
+  ADMIN: { key: "roleAdmin", cls: "bg-blue-100 text-blue-700" },
+  SUPER_ADMIN: { key: "roleSuperAdmin", cls: "bg-purple-100 text-purple-700" },
 };
-const roleLabel = (r) => roleMap[r]?.label || r;
+const roleLabel = (r) => (roleMap[r] ? t("admin." + roleMap[r].key) : r);
 const roleClass = (r) => roleMap[r]?.cls || "";
-const formatDate = (d) => new Date(d).toLocaleDateString("zh-CN");
+const formatDate = (d) => new Date(d).toLocaleDateString(undefined);
 
 let debounceTimer = null;
 const debouncedFetch = () => {
@@ -194,7 +182,7 @@ const fetchUsers = async () => {
 };
 
 const updateRole = async (user, role) => {
-  if (!confirm(`确定要将该用户角色改为"${roleLabel(role)}"吗？`)) {
+  if (!confirm(t('admin.confirmRoleChange', { role: roleLabel(role) }))) {
     return;
   }
 
@@ -202,7 +190,7 @@ const updateRole = async (user, role) => {
   try {
     await api.admin.updateUser(user.id, { role });
     user.role = role;
-    toast.success("角色已更新");
+    toast.success(t('admin.roleUpdated'));
   } catch (e) {
     toast.error(e.message);
   } finally {
@@ -211,14 +199,14 @@ const updateRole = async (user, role) => {
 };
 
 const toggleActive = async (user) => {
-  const action = user.isActive ? "禁用" : "启用";
-  if (!confirm(`确定要${action}该用户吗？`)) return;
+  const action = user.isActive ? t('admin.disabled') : t('admin.enabled');
+  if (!confirm(t('admin.confirmToggleUser', { action }))) return;
 
   updatingIds.value.add(user.id);
   try {
     await api.admin.updateUser(user.id, { isActive: !user.isActive });
     user.isActive = !user.isActive;
-    toast.success(user.isActive ? "已启用" : "已禁用");
+    toast.success(user.isActive ? t('admin.userEnabled') : t('admin.userDisabled'));
   } catch (e) {
     toast.error(e.message);
   } finally {

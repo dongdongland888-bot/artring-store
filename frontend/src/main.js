@@ -6,9 +6,13 @@ import 'vue-toastification/dist/index.css'
 
 import App from './App.vue'
 import router from './router'
+import i18n from './i18n'
 import './assets/main.css'
 
 const app = createApp(App)
+
+// 多语言
+app.use(i18n)
 
 // Pinia 状态管理
 const pinia = createPinia()

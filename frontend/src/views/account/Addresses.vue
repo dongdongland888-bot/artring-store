@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-2xl font-serif font-bold mb-6">收货地址</h1>
+    <h1 class="text-2xl font-serif font-bold mb-6">{{ t('account.addressesTitle') }}</h1>
 
     <!-- Address List -->
     <div class="space-y-4">
@@ -9,22 +9,22 @@
           <div>
             <p class="font-medium">
               {{ addr.firstName }} {{ addr.lastName }}
-              <span v-if="addr.isDefault" class="text-xs bg-accent-100 text-accent-600 px-2 py-0.5 ml-2 rounded">默认</span>
+              <span v-if="addr.isDefault" class="text-xs bg-accent-100 text-accent-600 px-2 py-0.5 ml-2 rounded">{{ t('account.default') }}</span>
             </p>
             <p class="text-sm text-gray-600 mt-1">{{ addr.street }}, {{ addr.city }}, {{ addr.state }} {{ addr.postalCode }}</p>
             <p class="text-sm text-gray-600">{{ addr.country }}</p>
             <p class="text-sm text-gray-600">{{ addr.phone }}</p>
           </div>
           <div class="flex gap-3 flex-shrink-0">
-            <button @click="openEdit(addr)" class="text-sm text-blue-600 hover:underline">编辑</button>
-            <button @click="deleteAddress(addr.id)" class="text-sm text-red-500 hover:underline">删除</button>
+            <button @click="openEdit(addr)" class="text-sm text-blue-600 hover:underline">{{ t('common.edit') }}</button>
+            <button @click="deleteAddress(addr.id)" class="text-sm text-red-500 hover:underline">{{ t('common.delete') }}</button>
           </div>
         </div>
       </div>
-      <div v-if="addresses.length === 0" class="text-gray-400 text-center py-8">暂无收货地址</div>
+      <div v-if="addresses.length === 0" class="text-gray-400 text-center py-8">{{ t('account.noAddresses') }}</div>
     </div>
 
-    <button @click="openAdd" class="btn btn-outline mt-6">+ 添加新地址</button>
+    <button @click="openAdd" class="btn btn-outline mt-6">+ {{ t('account.addNewAddress') }}</button>
 
     <!-- Address Modal -->
     <TransitionRoot :show="showModal" as="template">
@@ -46,56 +46,56 @@
             >
               <DialogPanel class="w-full max-w-lg bg-white shadow-xl p-6">
                 <DialogTitle class="text-lg font-semibold mb-4">
-                  {{ editingId ? '编辑地址' : '添加新地址' }}
+                  {{ editingId ? t('account.editAddress') : t('account.addAddress') }}
                 </DialogTitle>
 
                 <form @submit.prevent="handleSubmit" class="space-y-4">
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-sm font-medium mb-1">姓</label>
+                      <label class="block text-sm font-medium mb-1">{{ t('checkout.lastName') }}</label>
                       <input v-model="form.firstName" type="text" class="input" required />
                     </div>
                     <div>
-                      <label class="block text-sm font-medium mb-1">名</label>
+                      <label class="block text-sm font-medium mb-1">{{ t('checkout.firstName') }}</label>
                       <input v-model="form.lastName" type="text" class="input" required />
                     </div>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1">电话</label>
+                    <label class="block text-sm font-medium mb-1">{{ t('checkout.phone') }}</label>
                     <input v-model="form.phone" type="tel" class="input" required />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1">街道地址</label>
+                    <label class="block text-sm font-medium mb-1">{{ t('checkout.street') }}</label>
                     <input v-model="form.street" type="text" class="input" required />
                   </div>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-sm font-medium mb-1">城市</label>
+                      <label class="block text-sm font-medium mb-1">{{ t('checkout.city') }}</label>
                       <input v-model="form.city" type="text" class="input" required />
                     </div>
                     <div>
-                      <label class="block text-sm font-medium mb-1">省/州</label>
+                      <label class="block text-sm font-medium mb-1">{{ t('checkout.state') }}</label>
                       <input v-model="form.state" type="text" class="input" required />
                     </div>
                   </div>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-sm font-medium mb-1">国家</label>
+                      <label class="block text-sm font-medium mb-1">{{ t('checkout.country') }}</label>
                       <input v-model="form.country" type="text" class="input" required />
                     </div>
                     <div>
-                      <label class="block text-sm font-medium mb-1">邮编</label>
+                      <label class="block text-sm font-medium mb-1">{{ t('checkout.postalCode') }}</label>
                       <input v-model="form.postalCode" type="text" class="input" required />
                     </div>
                   </div>
                   <label class="flex items-center gap-2 cursor-pointer">
                     <input v-model="form.isDefault" type="checkbox" class="rounded" />
-                    <span class="text-sm">设为默认地址</span>
+                    <span class="text-sm">{{ t('checkout.setDefaultAddress') }}</span>
                   </label>
                   <div class="flex justify-end gap-3 pt-2">
-                    <button type="button" @click="showModal = false" class="btn btn-outline">取消</button>
+                    <button type="button" @click="showModal = false" class="btn btn-outline">{{ t('common.cancel') }}</button>
                     <button type="submit" class="btn btn-primary" :disabled="isSaving">
-                      {{ isSaving ? '保存中...' : '保存' }}
+                      {{ isSaving ? t('account.saving') : t('common.save') }}
                     </button>
                   </div>
                 </form>
@@ -110,20 +110,22 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { useToast } from 'vue-toastification'
 import api from '@/api'
 
+const { t } = useI18n()
 const toast = useToast()
 const addresses = ref([])
 const showModal = ref(false)
 const editingId = ref(null)
 const isSaving = ref(false)
 
-const defaultForm = { firstName: '', lastName: '', phone: '', street: '', city: '', state: '', country: '中国', postalCode: '', isDefault: false }
-const form = reactive({ ...defaultForm })
+const defaultForm = () => ({ firstName: '', lastName: '', phone: '', street: '', city: '', state: '', country: t('checkout.defaultCountry'), postalCode: '', isDefault: false })
+const form = reactive(defaultForm())
 
-const resetForm = () => Object.assign(form, { ...defaultForm })
+const resetForm = () => Object.assign(form, defaultForm())
 
 const openAdd = () => {
   resetForm()
@@ -167,7 +169,7 @@ const handleSubmit = async () => {
       })
     }
     showModal.value = false
-    toast.success(editingId.value ? '地址已更新' : '地址已添加')
+    toast.success(editingId.value ? t('account.addressUpdated') : t('account.addressAdded'))
   } catch (e) {
     toast.error(e.message)
   } finally {
@@ -179,7 +181,7 @@ const deleteAddress = async (id) => {
   try {
     await api.users.deleteAddress(id)
     addresses.value = addresses.value.filter(a => a.id !== id)
-    toast.success('已删除')
+    toast.success(t('account.deleted'))
   } catch (e) {
     toast.error(e.message)
   }

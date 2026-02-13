@@ -1,20 +1,18 @@
 <template>
   <div class="container-custom py-8 sm:py-12">
-    <!-- 面包屑 -->
     <nav class="mb-6 sm:mb-8 text-sm">
-      <RouterLink to="/" class="text-gray-500 hover:text-dark">首页</RouterLink>
+      <RouterLink to="/" class="text-gray-500 hover:text-dark">{{ t('shop.home') }}</RouterLink>
       <span class="mx-2 text-gray-400">/</span>
-      <span>全部商品</span>
+      <span>{{ t('shop.allProducts') }}</span>
     </nav>
 
     <div class="lg:flex gap-8 xl:gap-12">
-      <!-- Mobile filter toggle -->
       <button
         @click="showFilters = true"
         class="lg:hidden flex items-center gap-2 mb-4 text-sm font-medium border px-4 py-2.5 hover:bg-gray-50 w-full justify-center"
       >
         <AdjustmentsHorizontalIcon class="w-4 h-4" />
-        筛选条件
+        {{ t('shop.filters') }}
       </button>
 
       <!-- Sidebar overlay (mobile) -->
@@ -30,17 +28,15 @@
         :class="showFilters ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
       >
         <div class="p-6 lg:p-0 lg:sticky lg:top-24 space-y-8">
-          <!-- Mobile header -->
           <div class="flex items-center justify-between lg:hidden">
-            <h3 class="font-semibold text-lg">筛选条件</h3>
+            <h3 class="font-semibold text-lg">{{ t('shop.filters') }}</h3>
             <button @click="showFilters = false" class="p-1 hover:bg-gray-100 rounded">
               <XMarkIcon class="w-5 h-5" />
             </button>
           </div>
 
-          <!-- 分类 -->
           <div>
-            <h3 class="font-semibold mb-4">分类</h3>
+            <h3 class="font-semibold mb-4">{{ t('nav.categories') }}</h3>
             <ul class="space-y-2">
               <li>
                 <button 
@@ -48,7 +44,7 @@
                   class="text-sm"
                   :class="filters.category === '' ? 'font-semibold' : 'text-gray-600'"
                 >
-                  全部
+                  {{ t('shop.all') }}
                 </button>
               </li>
               <li v-for="cat in categories" :key="cat.id">
@@ -63,9 +59,8 @@
             </ul>
           </div>
 
-          <!-- 材质 -->
           <div>
-            <h3 class="font-semibold mb-4">材质</h3>
+            <h3 class="font-semibold mb-4">{{ t('admin.material') }}</h3>
             <ul class="space-y-2">
               <li v-for="m in materials" :key="m">
                 <label class="flex items-center gap-2 cursor-pointer">
@@ -81,32 +76,30 @@
             </ul>
           </div>
 
-          <!-- 价格范围 -->
           <div>
-            <h3 class="font-semibold mb-4">价格</h3>
+            <h3 class="font-semibold mb-4">{{ t('admin.price') }}</h3>
             <div class="flex gap-2 items-center">
               <input 
                 v-model.number="filters.minPrice"
                 type="number"
-                placeholder="最低"
+                :placeholder="t('shop.minPrice')"
                 class="input w-24 text-sm py-2"
               >
               <span class="text-gray-400">-</span>
               <input 
                 v-model.number="filters.maxPrice"
                 type="number"
-                placeholder="最高"
+                :placeholder="t('shop.maxPrice')"
                 class="input w-24 text-sm py-2"
               >
             </div>
           </div>
 
-          <!-- 清除筛选 -->
           <button 
             @click="clearFilters"
             class="text-sm text-gray-500 underline"
           >
-            清除筛选
+            {{ t('shop.clearFilters') }}
           </button>
         </div>
       </aside>
@@ -116,17 +109,17 @@
         <!-- 头部 -->
         <div class="flex items-center justify-between mb-6 sm:mb-8">
           <p class="text-gray-500 text-sm sm:text-base">
-            共 {{ total }} 件商品
+            {{ t('shop.totalCount', { count: total }) }}
           </p>
           <select 
             v-model="sort"
             class="input w-auto text-sm py-2"
           >
-            <option value="newest">最新上架</option>
-            <option value="priceAsc">价格从低到高</option>
-            <option value="priceDesc">价格从高到低</option>
-            <option value="popular">热门商品</option>
-            <option value="rating">好评优先</option>
+            <option value="newest">{{ t('shop.sortNewest') }}</option>
+            <option value="priceAsc">{{ t('shop.sortPriceAsc') }}</option>
+            <option value="priceDesc">{{ t('shop.sortPriceDesc') }}</option>
+            <option value="popular">{{ t('shop.sortPopular') }}</option>
+            <option value="rating">{{ t('shop.sortRating') }}</option>
           </select>
         </div>
 
@@ -148,11 +141,10 @@
           />
         </div>
 
-        <!-- 无商品 -->
         <div v-else class="text-center py-20">
-          <p class="text-gray-500 mb-4">没有找到相关商品</p>
+          <p class="text-gray-500 mb-4">{{ t('shop.noProducts') }}</p>
           <button @click="clearFilters" class="btn btn-outline">
-            清除筛选
+            {{ t('shop.clearFilters') }}
           </button>
         </div>
 
@@ -175,11 +167,13 @@
 
 <script setup>
 import { ref, reactive, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { AdjustmentsHorizontalIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import ProductCard from '@/components/product/ProductCard.vue'
 import api from '@/api'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 

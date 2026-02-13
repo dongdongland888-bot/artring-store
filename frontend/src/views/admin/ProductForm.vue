@@ -1,19 +1,17 @@
 <template>
   <div>
     <div class="flex items-center gap-4 mb-6">
-      <RouterLink to="/admin/products" class="text-gray-500 hover:text-dark"
-        >&larr; 返回</RouterLink
-      >
-      <h1 class="text-2xl font-bold">{{ isEdit ? "编辑商品" : "添加商品" }}</h1>
+      <RouterLink to="/admin/products" class="text-gray-500 hover:text-dark">&larr; {{ t('admin.back') }}</RouterLink>
+      <h1 class="text-2xl font-bold">{{ isEdit ? t('admin.editProduct') : t('admin.addProduct') }}</h1>
     </div>
 
     <form @submit.prevent="handleSubmit" class="space-y-6">
       <!-- Basic Info -->
       <div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
-        <h2 class="font-semibold text-lg mb-2">基本信息</h2>
+        <h2 class="font-semibold text-lg mb-2">{{ t('admin.basicInfo') }}</h2>
         <div class="grid md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium mb-1">商品名称 *</label>
+            <label class="block text-sm font-medium mb-1">{{ t('admin.productName') }} *</label>
             <input
               v-model="form.name"
               type="text"
@@ -28,11 +26,11 @@
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">简短描述</label>
+          <label class="block text-sm font-medium mb-1">{{ t('admin.shortDesc') }}</label>
           <input v-model="form.shortDesc" type="text" class="input" />
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">详细描述</label>
+          <label class="block text-sm font-medium mb-1">{{ t('admin.fullDesc') }}</label>
           <textarea
             v-model="form.description"
             rows="4"
@@ -41,17 +39,17 @@
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <label class="block text-sm font-medium mb-1">材质</label>
+            <label class="block text-sm font-medium mb-1">{{ t('admin.material') }}</label>
             <input v-model="form.material" type="text" class="input" />
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">风格</label>
+            <label class="block text-sm font-medium mb-1">{{ t('admin.style') }}</label>
             <input v-model="form.style" type="text" class="input" />
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">分类</label>
+            <label class="block text-sm font-medium mb-1">{{ t('admin.category') }}</label>
             <select v-model="form.categoryId" class="input">
-              <option value="">无分类</option>
+              <option value="">{{ t('admin.noCategory') }}</option>
               <option v-for="cat in categories" :key="cat.id" :value="cat.id">
                 {{ cat.name }}
               </option>
@@ -64,7 +62,7 @@
                 type="checkbox"
                 class="rounded"
               />
-              <span class="text-sm">特色商品</span>
+              <span class="text-sm">{{ t('admin.featured') }}</span>
             </label>
           </div>
         </div>
@@ -72,10 +70,10 @@
 
       <!-- Pricing -->
       <div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
-        <h2 class="font-semibold text-lg mb-2">价格</h2>
+        <h2 class="font-semibold text-lg mb-2">{{ t('admin.price') }}</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
-            <label class="block text-sm font-medium mb-1">基础价 *</label>
+            <label class="block text-sm font-medium mb-1">{{ t('admin.basePrice') }} *</label>
             <input
               v-model.number="form.basePrice"
               type="number"
@@ -85,7 +83,7 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">原价 (划线价)</label>
+            <label class="block text-sm font-medium mb-1">{{ t('admin.originalPrice') }}</label>
             <input
               v-model.number="form.comparePrice"
               type="number"
@@ -94,7 +92,7 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">成本价</label>
+            <label class="block text-sm font-medium mb-1">{{ t('admin.costPrice') }}</label>
             <input
               v-model.number="form.costPrice"
               type="number"
@@ -108,20 +106,20 @@
       <!-- Variants (only in edit mode or created inline for new) -->
       <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="font-semibold text-lg">变体 (尺寸/颜色)</h2>
+          <h2 class="font-semibold text-lg">{{ t('admin.variantsSection') }}</h2>
           <button
             type="button"
             @click="addVariant"
             class="text-sm text-blue-600 hover:underline"
           >
-            + 添加变体
+            + {{ t('admin.addVariant') }}
           </button>
         </div>
         <div
           v-if="form.variants.length === 0"
           class="text-gray-400 text-sm py-4 text-center"
         >
-          暂无变体
+          {{ t('admin.noVariants') }}
         </div>
         <div v-else class="space-y-3">
           <div
@@ -134,15 +132,15 @@
               <input v-model="v.sku" type="text" class="input text-sm py-2" />
             </div>
             <div>
-              <label class="text-xs text-gray-500">尺寸</label>
+              <label class="text-xs text-gray-500">{{ t('admin.size') }}</label>
               <input v-model="v.size" type="text" class="input text-sm py-2" />
             </div>
             <div>
-              <label class="text-xs text-gray-500">颜色</label>
+              <label class="text-xs text-gray-500">{{ t('admin.color') }}</label>
               <input v-model="v.color" type="text" class="input text-sm py-2" />
             </div>
             <div>
-              <label class="text-xs text-gray-500">价格</label>
+              <label class="text-xs text-gray-500">{{ t('admin.price') }}</label>
               <input
                 v-model.number="v.price"
                 type="number"
@@ -151,7 +149,7 @@
               />
             </div>
             <div>
-              <label class="text-xs text-gray-500">库存</label>
+              <label class="text-xs text-gray-500">{{ t('admin.stock') }}</label>
               <input
                 v-model.number="v.stock"
                 type="number"
@@ -164,7 +162,7 @@
                 @click="removeVariant(i)"
                 class="text-red-500 hover:underline text-sm py-2"
               >
-                删除
+                {{ t('common.delete') }}
               </button>
             </div>
           </div>
@@ -174,20 +172,20 @@
       <!-- Images -->
       <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="font-semibold text-lg">商品图片</h2>
+          <h2 class="font-semibold text-lg">{{ t('admin.productImages') }}</h2>
           <button
             type="button"
             @click="addImage"
             class="text-sm text-blue-600 hover:underline"
           >
-            + 添加图片
+            + {{ t('admin.addImage') }}
           </button>
         </div>
         <div
           v-if="form.images.length === 0"
           class="text-gray-400 text-sm py-4 text-center"
         >
-          暂无图片
+          {{ t('admin.noImages') }}
         </div>
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div
@@ -204,13 +202,13 @@
               <input
                 v-model="img.url"
                 type="text"
-                placeholder="图片 URL"
+                :placeholder="t('admin.imageUrlPlaceholder')"
                 class="input text-sm py-1.5 mb-1"
               />
               <input
                 v-model="img.alt"
                 type="text"
-                placeholder="Alt 文字"
+                :placeholder="t('admin.altTextPlaceholder')"
                 class="input text-sm py-1.5"
               />
             </div>
@@ -219,7 +217,7 @@
               @click="removeImage(i)"
               class="text-red-500 hover:underline text-sm flex-shrink-0"
             >
-              删除
+              {{ t('common.delete') }}
             </button>
           </div>
         </div>
@@ -227,11 +225,9 @@
 
       <!-- Submit -->
       <div class="flex justify-end gap-3">
-        <RouterLink to="/admin/products" class="btn btn-outline"
-          >取消</RouterLink
-        >
+        <RouterLink to="/admin/products" class="btn btn-outline">{{ t('common.cancel') }}</RouterLink>
         <button type="submit" class="btn btn-primary" :disabled="isSaving">
-          {{ isSaving ? "保存中..." : isEdit ? "保存修改" : "创建商品" }}
+          {{ isSaving ? t('admin.saving') : isEdit ? t('admin.saveEdit') : t('admin.createProduct') }}
         </button>
       </div>
     </form>
@@ -241,11 +237,13 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useToast } from "vue-toastification";
 import api from "@/api";
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const toast = useToast();
 
 const isEdit = computed(() => !!route.params.id);
@@ -380,13 +378,13 @@ const handleSubmit = async () => {
         });
       }
 
-      toast.success("商品已更新");
+      toast.success(t("admin.productUpdated"));
     } else {
       // Create with variants and images inline
       data.variants = form.variants.filter((v) => v.sku);
       data.images = form.images.filter((img) => img.url);
       await api.admin.createProduct(data);
-      toast.success("商品已创建");
+      toast.success(t("admin.productCreated"));
     }
     router.push("/admin/products");
   } catch (e) {
@@ -440,7 +438,7 @@ onMounted(async () => {
         })),
       });
     } catch (e) {
-      toast.error("加载商品失败");
+      toast.error(t("admin.loadProductFailed"));
       router.push("/admin/products");
     }
   }

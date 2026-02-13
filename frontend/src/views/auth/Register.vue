@@ -3,38 +3,38 @@
     <div class="w-full max-w-md">
       <div class="text-center mb-8">
         <RouterLink to="/" class="text-3xl font-serif font-bold">ArtRing</RouterLink>
-        <h1 class="text-2xl font-semibold mt-6 mb-2">创建账户</h1>
-        <p class="text-gray-500">加入我们，发现独特风格</p>
+        <h1 class="text-2xl font-semibold mt-6 mb-2">{{ t('auth.createAccount') }}</h1>
+        <p class="text-gray-500">{{ t('auth.joinUs') }}</p>
       </div>
 
       <form @submit.prevent="handleRegister" class="space-y-6">
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium mb-2">姓</label>
-            <input v-model="form.lastName" type="text" class="input" placeholder="姓">
+            <label class="block text-sm font-medium mb-2">{{ t('auth.lastName') }}</label>
+            <input v-model="form.lastName" type="text" class="input" :placeholder="t('auth.lastName')">
           </div>
           <div>
-            <label class="block text-sm font-medium mb-2">名</label>
-            <input v-model="form.firstName" type="text" class="input" placeholder="名">
+            <label class="block text-sm font-medium mb-2">{{ t('auth.firstName') }}</label>
+            <input v-model="form.firstName" type="text" class="input" :placeholder="t('auth.firstName')">
           </div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-2">邮箱 *</label>
+          <label class="block text-sm font-medium mb-2">{{ t('auth.email') }} *</label>
           <input 
             v-model="form.email" 
             type="email" 
             required 
             class="input" 
             :class="{ 'border-red-500': errors.email }"
-            placeholder="your@email.com"
+            :placeholder="t('auth.emailPlaceholder')"
             @blur="validateEmail"
           >
           <p v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email }}</p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-2">密码 *</label>
+          <label class="block text-sm font-medium mb-2">{{ t('auth.password') }} *</label>
           <div class="relative">
             <input 
               v-model="form.password" 
@@ -43,7 +43,7 @@
               minlength="6" 
               class="input pr-10" 
               :class="{ 'border-red-500': errors.password }"
-              placeholder="至少6位字符"
+              :placeholder="t('auth.passwordPlaceholderMin')"
               @input="validatePassword"
             >
             <button
@@ -74,7 +74,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-2">确认密码 *</label>
+          <label class="block text-sm font-medium mb-2">{{ t('auth.confirmPassword') }} *</label>
           <div class="relative">
             <input 
               v-model="form.confirmPassword" 
@@ -82,7 +82,7 @@
               required 
               class="input pr-10" 
               :class="{ 'border-red-500': errors.confirmPassword }"
-              placeholder="再次输入密码"
+              :placeholder="t('auth.confirmPasswordPlaceholder')"
               @input="validateConfirmPassword"
             >
             <button
@@ -101,9 +101,10 @@
         <label class="flex items-start gap-2 text-sm">
           <input v-model="form.agreeTerms" type="checkbox" required class="rounded mt-1">
           <span class="text-gray-600">
-            我已阅读并同意 
-            <RouterLink to="/terms" class="text-accent-600 hover:underline">服务条款</RouterLink> 和 
-            <RouterLink to="/privacy" class="text-accent-600 hover:underline">隐私政策</RouterLink>
+            {{ t('auth.agreeTermsPrefix') }}
+            <RouterLink to="/terms" class="text-accent-600 hover:underline">{{ t('auth.terms') }}</RouterLink>
+            {{ t('auth.agreeTermsAnd') }}
+            <RouterLink to="/privacy" class="text-accent-600 hover:underline">{{ t('auth.privacy') }}</RouterLink>
           </span>
         </label>
 
@@ -112,12 +113,12 @@
           class="w-full btn btn-primary" 
           :disabled="isLoading || !isFormValid"
         >
-          {{ isLoading ? '注册中...' : '创建账户' }}
+          {{ isLoading ? t('auth.registering') : t('auth.createAccount') }}
         </button>
       </form>
 
       <p class="text-center mt-8 text-gray-500">
-        已有账户? <RouterLink to="/login" class="text-accent-600 hover:underline">立即登录</RouterLink>
+        {{ t('auth.haveAccount') }} <RouterLink to="/login" class="text-accent-600 hover:underline">{{ t('auth.loginHere') }}</RouterLink>
       </p>
     </div>
   </div>
@@ -125,11 +126,13 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
 
+const { t } = useI18n()
 const router = useRouter()
 const toast = useToast()
 const authStore = useAuthStore()
@@ -153,9 +156,9 @@ const errors = reactive({
 
 const validateEmail = () => {
   if (!form.email) {
-    errors.email = '请输入邮箱'
+    errors.email = t('auth.errorEmailRequired')
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = '邮箱格式不正确'
+    errors.email = t('auth.errorEmailInvalid')
   } else {
     errors.email = ''
   }
@@ -163,23 +166,22 @@ const validateEmail = () => {
 
 const validatePassword = () => {
   if (!form.password) {
-    errors.password = '请输入密码'
+    errors.password = t('auth.errorPasswordRequired')
   } else if (form.password.length < 6) {
-    errors.password = '密码至少6位'
+    errors.password = t('auth.errorPasswordMin')
   } else if (form.password.length < 8) {
-    errors.password = '建议密码至少8位，包含字母和数字'
+    errors.password = t('auth.strengthSuggestion')
   } else {
     errors.password = ''
   }
-  // Re-validate confirm if it has value
   if (form.confirmPassword) validateConfirmPassword()
 }
 
 const validateConfirmPassword = () => {
   if (!form.confirmPassword) {
-    errors.confirmPassword = '请确认密码'
+    errors.confirmPassword = t('auth.errorConfirmRequired')
   } else if (form.password !== form.confirmPassword) {
-    errors.confirmPassword = '两次密码不一致'
+    errors.confirmPassword = t('auth.errorPasswordMismatch')
   } else {
     errors.confirmPassword = ''
   }
@@ -209,9 +211,9 @@ const getStrengthTextColor = (s) => {
 }
 
 const getStrengthText = (s) => {
-  if (s === 1) return '弱'
-  if (s === 2) return '中等'
-  return '强'
+  if (s === 1) return t('auth.strengthWeak')
+  if (s === 2) return t('auth.strengthMedium')
+  return t('auth.strengthStrong')
 }
 
 const isFormValid = computed(() => {
@@ -236,10 +238,10 @@ const handleRegister = async () => {
   isLoading.value = true
   try {
     await authStore.register(form)
-    toast.success('注册成功')
+    toast.success(t('auth.registerSuccess'))
     router.push('/')
   } catch (error) {
-    toast.error(error.message)
+    toast.error(error.message || t('common.error'))
   } finally {
     isLoading.value = false
   }

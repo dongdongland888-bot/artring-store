@@ -3,27 +3,27 @@
     <div class="w-full max-w-md">
       <div class="text-center mb-8">
         <RouterLink to="/" class="text-3xl font-serif font-bold">ArtRing</RouterLink>
-        <h1 class="text-2xl font-semibold mt-6 mb-2">登录</h1>
-        <p class="text-gray-500">欢迎回来</p>
+        <h1 class="text-2xl font-semibold mt-6 mb-2">{{ t('auth.login') }}</h1>
+        <p class="text-gray-500">{{ t('auth.welcomeBack') }}</p>
       </div>
 
       <form @submit.prevent="handleLogin" class="space-y-6">
         <div>
-          <label class="block text-sm font-medium mb-2">邮箱</label>
+          <label class="block text-sm font-medium mb-2">{{ t('auth.email') }}</label>
           <input 
             v-model="form.email"
             type="email"
             required
             class="input"
             :class="{ 'border-red-500': errors.email }"
-            placeholder="your@email.com"
+            :placeholder="t('auth.emailPlaceholder')"
             @blur="validateEmail"
           >
           <p v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email }}</p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-2">密码</label>
+          <label class="block text-sm font-medium mb-2">{{ t('auth.password') }}</label>
           <div class="relative">
             <input 
               v-model="form.password"
@@ -31,10 +31,10 @@
               required
               minlength="6"
               class="input pr-10"
-              :class="{ 'border-red-500': errors.password }"
-              placeholder="••••••••"
-              @blur="validatePassword"
-            >
+            :class="{ 'border-red-500': errors.password }"
+            :placeholder="t('auth.passwordPlaceholder')"
+            @blur="validatePassword"
+          >
             <button
               type="button"
               @click="showPassword = !showPassword"
@@ -51,10 +51,10 @@
         <div class="flex items-center justify-between text-sm">
           <label class="flex items-center gap-2 cursor-pointer">
             <input v-model="form.remember" type="checkbox" class="rounded">
-            <span>记住我</span>
+            <span>{{ t('auth.rememberMe') }}</span>
           </label>
           <RouterLink to="/forgot-password" class="text-accent-600 hover:underline">
-            忘记密码?
+            {{ t('auth.forgotPassword') }}
           </RouterLink>
         </div>
 
@@ -63,14 +63,14 @@
           class="w-full btn btn-primary"
           :disabled="isLoading || !isFormValid"
         >
-          {{ isLoading ? '登录中...' : '登录' }}
+          {{ isLoading ? t('auth.loggingIn') : t('auth.login') }}
         </button>
       </form>
 
       <p class="text-center mt-8 text-gray-500">
-        还没有账户? 
+        {{ t('auth.noAccount') }} 
         <RouterLink to="/register" class="text-accent-600 hover:underline">
-          立即注册
+          {{ t('auth.registerNow') }}
         </RouterLink>
       </p>
     </div>
@@ -79,12 +79,14 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 
+const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
@@ -105,9 +107,9 @@ const errors = reactive({
 
 const validateEmail = () => {
   if (!form.email) {
-    errors.email = '请输入邮箱'
+    errors.email = t('auth.errorEmailRequired')
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = '邮箱格式不正确'
+    errors.email = t('auth.errorEmailInvalid')
   } else {
     errors.email = ''
   }
@@ -115,9 +117,9 @@ const validateEmail = () => {
 
 const validatePassword = () => {
   if (!form.password) {
-    errors.password = '请输入密码'
+    errors.password = t('auth.errorPasswordRequired')
   } else if (form.password.length < 6) {
-    errors.password = '密码至少6位'
+    errors.password = t('auth.errorPasswordMin')
   } else {
     errors.password = ''
   }
@@ -136,12 +138,12 @@ const handleLogin = async () => {
   try {
     await authStore.login(form.email, form.password)
     await cartStore.fetchCart()
-    toast.success('登录成功')
+    toast.success(t('auth.loginSuccess'))
     
     const redirect = route.query.redirect || '/'
     router.push(redirect)
   } catch (error) {
-    toast.error(error.message)
+    toast.error(error.message || t('common.error'))
   } finally {
     isLoading.value = false
   }

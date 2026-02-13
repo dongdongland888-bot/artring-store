@@ -52,7 +52,7 @@
                         class="block px-4 py-3 hover:bg-gray-50 transition-colors"
                         @click="$emit('close')"
                       >
-                        全部商品
+                        {{ t('nav.shop') }}
                       </RouterLink>
 
                       <!-- 分类 -->
@@ -61,7 +61,7 @@
                           @click="showCategories = !showCategories"
                           class="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
                         >
-                          <span>分类</span>
+                          <span>{{ t('nav.categories') }}</span>
                           <ChevronDownIcon
                             class="w-5 h-5 transition-transform"
                             :class="{ 'rotate-180': showCategories }"
@@ -87,14 +87,14 @@
                         class="block px-4 py-3 hover:bg-gray-50 transition-colors"
                         @click="$emit('close')"
                       >
-                        关于我们
+                        {{ t('nav.about') }}
                       </RouterLink>
                       <RouterLink
                         to="/contact"
                         class="block px-4 py-3 hover:bg-gray-50 transition-colors"
                         @click="$emit('close')"
                       >
-                        联系我们
+                        {{ t('nav.contact') }}
                       </RouterLink>
                     </nav>
                   </div>
@@ -107,7 +107,7 @@
                       class="block w-full btn btn-primary text-center"
                       @click="$emit('close')"
                     >
-                      登录
+                      {{ t('auth.login') }}
                     </RouterLink>
                     <RouterLink
                       v-else
@@ -115,7 +115,7 @@
                       class="block w-full btn btn-outline text-center"
                       @click="$emit('close')"
                     >
-                      我的账户
+                      {{ t('nav.myAccount') }}
                     </RouterLink>
                   </div>
                 </div>
@@ -130,6 +130,7 @@
 
 <script setup>
 import { ref, toRef } from "vue";
+import { useI18n } from "vue-i18n";
 import {
   Dialog,
   DialogPanel,
@@ -139,6 +140,8 @@ import {
 import { XMarkIcon, ChevronDownIcon } from "@heroicons/vue/24/outline";
 import { useAuthStore } from "@/stores/auth";
 import { useBodyScrollLock } from "@/composables/useBodyScrollLock";
+
+const { t } = useI18n();
 
 const props = defineProps({
   show: Boolean,

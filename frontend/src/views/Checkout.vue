@@ -1,19 +1,17 @@
 <template>
   <div class="container-custom py-8 sm:py-12">
-    <!-- Empty cart redirect -->
     <div v-if="cartStore.isEmpty && !isLoading" class="text-center py-20">
       <ShoppingBagIcon class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-      <h2 class="text-xl font-semibold mb-2">购物车是空的</h2>
-      <p class="text-gray-500 mb-6">添加商品后再来结算吧</p>
-      <RouterLink to="/shop" class="btn btn-primary">去购物</RouterLink>
+      <h2 class="text-xl font-semibold mb-2">{{ t('checkout.emptyTitle') }}</h2>
+      <p class="text-gray-500 mb-6">{{ t('checkout.emptyHint') }}</p>
+      <RouterLink to="/shop" class="btn btn-primary">{{ t('cart.goShopping') }}</RouterLink>
     </div>
 
     <template v-else>
-      <!-- 支付步骤：订单已创建，等待支付完成 -->
       <div v-if="createdOrder" class="max-w-lg mx-auto py-12">
-        <h1 class="text-2xl font-serif font-bold mb-2">请完成支付</h1>
+        <h1 class="text-2xl font-serif font-bold mb-2">{{ t('checkout.completePayment') }}</h1>
         <p class="text-gray-500 mb-6">
-          订单号 {{ createdOrder.orderNumber }} · 应付
+          {{ t('checkout.orderNumberTotal', { number: createdOrder.orderNumber }) }}
           <span class="font-semibold text-dark"
             >${{ Number(createdOrder.total).toFixed(2) }}</span
           >
@@ -42,23 +40,20 @@
             createdOrder = null;
           "
         >
-          稍后支付
+          {{ t('checkout.payLater') }}
         </button>
       </div>
 
-      <!-- 结算表单 -->
       <div v-else class="lg:flex gap-8 xl:gap-12">
-        <!-- Left -->
         <div class="flex-1 space-y-6">
-          <!-- Shipping Address -->
           <div class="card">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-lg font-semibold">收货地址</h2>
+              <h2 class="text-lg font-semibold">{{ t('checkout.shippingAddress') }}</h2>
               <button
                 @click="openAddressForm"
                 class="text-sm text-blue-600 hover:underline"
               >
-                + 添加新地址
+                {{ t('checkout.addAddress') }}
               </button>
             </div>
 
@@ -110,12 +105,11 @@
                 </div>
               </div>
             </div>
-            <p v-else class="text-gray-500 py-4">请先添加收货地址</p>
+            <p v-else class="text-gray-500 py-4">{{ t('checkout.addAddressFirst') }}</p>
           </div>
 
-          <!-- Payment method selection -->
           <div class="card">
-            <h2 class="text-lg font-semibold mb-4">支付方式</h2>
+            <h2 class="text-lg font-semibold mb-4">{{ t('checkout.paymentMethod') }}</h2>
             <div class="space-y-2">
               <label
                 class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-all"
@@ -142,8 +136,8 @@
                   />
                 </svg>
                 <div>
-                  <p class="font-medium">Stripe 安全支付</p>
-                  <p class="text-sm text-gray-500">支持信用卡/借记卡</p>
+                  <p class="font-medium">{{ t('checkout.stripeTitle') }}</p>
+                  <p class="text-sm text-gray-500">{{ t('checkout.stripeDesc') }}</p>
                 </div>
               </label>
               <label
@@ -172,7 +166,7 @@
                 </svg>
                 <div>
                   <p class="font-medium">PayPal</p>
-                  <p class="text-sm text-gray-500">使用 PayPal 账户或银行卡</p>
+                  <p class="text-sm text-gray-500">{{ t('checkout.paypalDesc') }}</p>
                 </div>
               </label>
             </div>
@@ -182,7 +176,7 @@
         <!-- Right: Order Summary -->
         <div class="lg:w-96 mt-6 lg:mt-0">
           <div class="bg-gray-50 p-5 sm:p-6 rounded-lg sticky top-24">
-            <h2 class="text-lg font-semibold mb-4">订单摘要</h2>
+            <h2 class="text-lg font-semibold mb-4">{{ t('cart.orderSummary') }}</h2>
 
             <div class="space-y-3 mb-4 max-h-64 overflow-y-auto">
               <div
@@ -219,13 +213,13 @@
 
             <div class="space-y-2 text-sm">
               <div class="flex justify-between">
-                <span>小计</span>
+                <span>{{ t('cart.subtotal') }}</span>
                 <span>${{ cartStore.subtotal.toFixed(2) }}</span>
               </div>
               <div class="flex justify-between">
-                <span>运费</span>
+                <span>{{ t('cart.shipping') }}</span>
                 <span>{{
-                  shippingFee === 0 ? "免费" : `$${shippingFee.toFixed(2)}`
+                  shippingFee === 0 ? t('cart.free') : `$${shippingFee.toFixed(2)}`
                 }}</span>
               </div>
             </div>
@@ -233,7 +227,7 @@
             <hr class="my-4" />
 
             <div class="flex justify-between text-lg font-semibold">
-              <span>总计</span>
+              <span>{{ t('cart.total') }}</span>
               <span>${{ totalAmount.toFixed(2) }}</span>
             </div>
 
@@ -242,11 +236,11 @@
               class="w-full btn btn-primary mt-6"
               :disabled="!selectedAddress || isLoading"
             >
-              {{ isLoading ? "处理中..." : "确认下单" }}
+              {{ isLoading ? t('checkout.placing') : t('checkout.placeOrder') }}
             </button>
 
             <p class="text-xs text-gray-500 text-center mt-3">
-              点击"确认下单"即表示您同意我们的服务条款
+              {{ t('checkout.agreeTermsHint') }}
             </p>
           </div>
         </div>
@@ -282,14 +276,14 @@
               <DialogPanel
                 class="w-full max-w-lg bg-white shadow-xl p-6 rounded-lg"
               >
-                <DialogTitle class="text-lg font-semibold mb-4"
-                  >添加新地址</DialogTitle
-                >
+                <DialogTitle class="text-lg font-semibold mb-4">
+                  {{ t('checkout.addAddressTitle') }}
+                </DialogTitle>
 
                 <form @submit.prevent="handleAddAddress" class="space-y-4">
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-sm font-medium mb-1">姓 *</label>
+                      <label class="block text-sm font-medium mb-1">{{ t('checkout.lastName') }} *</label>
                       <input
                         v-model="addrForm.lastName"
                         type="text"
@@ -298,7 +292,7 @@
                       />
                     </div>
                     <div>
-                      <label class="block text-sm font-medium mb-1">名 *</label>
+                      <label class="block text-sm font-medium mb-1">{{ t('checkout.firstName') }} *</label>
                       <input
                         v-model="addrForm.firstName"
                         type="text"
@@ -308,7 +302,7 @@
                     </div>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1">电话 *</label>
+                    <label class="block text-sm font-medium mb-1">{{ t('checkout.phone') }} *</label>
                     <input
                       v-model="addrForm.phone"
                       type="tel"
@@ -317,9 +311,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1"
-                      >街道地址 *</label
-                    >
+                    <label class="block text-sm font-medium mb-1">{{ t('checkout.street') }} *</label>
                     <input
                       v-model="addrForm.street"
                       type="text"
@@ -329,9 +321,7 @@
                   </div>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-sm font-medium mb-1"
-                        >城市 *</label
-                      >
+                      <label class="block text-sm font-medium mb-1">{{ t('checkout.city') }} *</label>
                       <input
                         v-model="addrForm.city"
                         type="text"
@@ -340,9 +330,7 @@
                       />
                     </div>
                     <div>
-                      <label class="block text-sm font-medium mb-1"
-                        >省/州 *</label
-                      >
+                      <label class="block text-sm font-medium mb-1">{{ t('checkout.state') }} *</label>
                       <input
                         v-model="addrForm.state"
                         type="text"
@@ -353,9 +341,7 @@
                   </div>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-sm font-medium mb-1"
-                        >国家 *</label
-                      >
+                      <label class="block text-sm font-medium mb-1">{{ t('checkout.country') }} *</label>
                       <input
                         v-model="addrForm.country"
                         type="text"
@@ -364,9 +350,7 @@
                       />
                     </div>
                     <div>
-                      <label class="block text-sm font-medium mb-1"
-                        >邮编 *</label
-                      >
+                      <label class="block text-sm font-medium mb-1">{{ t('checkout.postalCode') }} *</label>
                       <input
                         v-model="addrForm.postalCode"
                         type="text"
@@ -381,7 +365,7 @@
                       type="checkbox"
                       class="rounded"
                     />
-                    <span class="text-sm">设为默认地址</span>
+                    <span class="text-sm">{{ t('checkout.setDefaultAddress') }}</span>
                   </label>
                   <div class="flex justify-end gap-3 pt-2">
                     <button
@@ -389,14 +373,14 @@
                       @click="showAddressModal = false"
                       class="btn btn-outline"
                     >
-                      取消
+                      {{ t('common.cancel') }}
                     </button>
                     <button
                       type="submit"
                       class="btn btn-primary"
                       :disabled="isSavingAddr"
                     >
-                      {{ isSavingAddr ? "保存中..." : "保存" }}
+                      {{ isSavingAddr ? t('common.loading') : t('common.save') }}
                     </button>
                   </div>
                 </form>
@@ -436,17 +420,14 @@
               <DialogPanel
                 class="w-full max-w-md bg-white shadow-xl p-6 rounded-lg"
               >
-                <!-- 第一步：确认下单 -->
                 <template v-if="!createdOrderInDialog">
-                  <DialogTitle class="text-lg font-semibold mb-3"
-                    >确认订单</DialogTitle
-                  >
+                  <DialogTitle class="text-lg font-semibold mb-3">
+                    {{ t('checkout.confirmOrderTitle') }}
+                  </DialogTitle>
                   <p class="text-gray-600 mb-6">
-                    您将支付
-                    <span class="font-bold text-dark">{{
-                      totalAmount.toFixed(2)
-                    }}</span>
-                    美元，确认下单吗？
+                    {{ t('checkout.youWillPay') }}
+                    <span class="font-bold text-dark">{{ totalAmount.toFixed(2) }}</span>
+                    {{ t('checkout.confirmOrderQuestion') }}
                   </p>
                   <div class="flex justify-end gap-3">
                     <button
@@ -454,29 +435,26 @@
                       class="btn btn-outline"
                       :disabled="isLoading"
                     >
-                      取消
+                      {{ t('common.cancel') }}
                     </button>
                     <button
                       @click="placeOrderThenPayInDialog"
                       class="btn btn-primary"
                       :disabled="isLoading"
                     >
-                      {{ isLoading ? "创建订单中..." : "确认" }}
+                      {{ isLoading ? t('checkout.creatingOrder') : t('common.confirm') }}
                     </button>
                   </div>
                 </template>
 
-                <!-- 第二步：弹窗内直接支付 -->
                 <template v-else>
-                  <DialogTitle class="text-lg font-semibold mb-2"
-                    >请完成支付</DialogTitle
-                  >
+                  <DialogTitle class="text-lg font-semibold mb-2">
+                    {{ t('payment.pleaseComplete') }}
+                  </DialogTitle>
                   <p class="text-sm text-gray-500 mb-4">
-                    订单号 {{ createdOrderInDialog.orderNumber }} ·
+                    {{ t('payment.orderNumberAmount', { number: createdOrderInDialog.orderNumber }) }}
                     <span class="font-semibold text-dark"
-                      >${{
-                        Number(createdOrderInDialog.total).toFixed(2)
-                      }}</span
+                      >${{ Number(createdOrderInDialog.total).toFixed(2) }}</span
                     >
                   </p>
                   <div class="min-h-[120px]">
@@ -502,7 +480,7 @@
                     class="btn btn-outline w-full mt-4"
                     @click="closeDialogAndGoPayLater"
                   >
-                    稍后支付
+                    {{ t('checkout.payLater') }}
                   </button>
                 </template>
               </DialogPanel>
@@ -516,9 +494,12 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useToast } from "vue-toastification";
 import { useCartStore } from "@/stores/cart";
+
+const { t } = useI18n();
 import {
   Dialog,
   DialogPanel,
@@ -550,7 +531,7 @@ const addrForm = reactive({
   street: "",
   city: "",
   state: "",
-  country: "中国",
+  country: "",
   postalCode: "",
   isDefault: false,
 });
@@ -571,7 +552,7 @@ const openAddressForm = () => {
     street: "",
     city: "",
     state: "",
-    country: "中国",
+    country: t("checkout.defaultCountry"),
     postalCode: "",
     isDefault: false,
   });
@@ -585,7 +566,7 @@ const handleAddAddress = async () => {
     addresses.value.push(res.address);
     selectedAddress.value = res.address.id;
     showAddressModal.value = false;
-    toast.success("地址已添加");
+    toast.success(t("checkout.addressAdded"));
   } catch (e) {
     toast.error(e.message);
   } finally {
@@ -604,7 +585,7 @@ const createdOrderInDialog = ref(null);
 
 const confirmOrder = () => {
   if (!selectedAddress.value) {
-    toast.warning("请选择收货地址");
+    toast.warning(t("checkout.selectAddressFirst"));
     return;
   }
   createdOrderInDialog.value = null;
@@ -618,7 +599,7 @@ const placeOrderThenPayInDialog = async () => {
     const res = await api.orders.create({ addressId: selectedAddress.value });
     cartStore.clearLocal();
     createdOrderInDialog.value = res.order;
-    toast.success("订单已创建，请完成支付");
+    toast.success(t("checkout.orderCreatedPayNow"));
   } catch (e) {
     toast.error(e.message);
   } finally {
@@ -628,7 +609,7 @@ const placeOrderThenPayInDialog = async () => {
 
 const onPaymentSuccessInDialog = (res) => {
   const orderNumber = res?.orderNumber;
-  toast.success(res?.message || "支付成功");
+  toast.success(res?.message || t("checkout.paySuccess"));
   showConfirmDialog.value = false;
   createdOrderInDialog.value = null;
   if (orderNumber) router.push(`/order-success/${orderNumber}`);
@@ -651,14 +632,14 @@ const closeConfirmDialog = () => {
 };
 
 const onPaymentSuccess = (res) => {
-  toast.success(res?.message || "支付成功");
+  toast.success(res?.message || t("checkout.paySuccess"));
   router.push(
     `/order-success/${res?.orderNumber || createdOrder.value?.orderNumber}`
   );
 };
 
 const onPaymentError = (err) => {
-  toast.error(err?.message || "支付失败，请重试");
+  toast.error(err?.message || t("checkout.payFailedRetry"));
 };
 
 onMounted(async () => {
@@ -670,7 +651,7 @@ onMounted(async () => {
         addresses.value.find((a) => a.isDefault)?.id || addresses.value[0].id;
     }
   } catch (e) {
-    toast.error("加载地址失败: " + e.message);
+    toast.error(t("checkout.loadAddressFailed") + ": " + e.message);
   } finally {
     isLoadingAddresses.value = false;
   }

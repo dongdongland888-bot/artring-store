@@ -28,17 +28,17 @@
               class="w-full max-w-md bg-white shadow-xl rounded-lg p-6"
             >
               <DialogTitle class="text-lg font-semibold mb-2">
-                请完成支付
+                {{ t('payment.pleaseComplete') }}
               </DialogTitle>
               <p class="text-sm text-gray-500 mb-4">
-                订单号 {{ order?.orderNumber }} · 应付
+                {{ t('payment.orderNumberAmount', { number: order?.orderNumber ?? '' }) }}
                 <span class="font-semibold text-dark">
                   ${{ order ? Number(order.total).toFixed(2) : "0.00" }}
                 </span>
               </p>
 
               <!-- 支付方式选择 -->
-              <p class="text-sm font-medium text-gray-700 mb-2">选择支付方式</p>
+              <p class="text-sm font-medium text-gray-700 mb-2">{{ t('payment.selectMethod') }}</p>
               <div class="grid grid-cols-2 gap-2 mb-4">
                 <label
                   class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all"
@@ -124,17 +124,17 @@
                   class="btn btn-primary w-full"
                   @click="confirmPay"
                 >
-                  确定支付
+                  {{ t('payment.confirmPay') }}
                 </button>
                 <p v-else class="text-sm text-gray-500 text-center">
-                  请点击上方 PayPal 按钮完成支付
+                  {{ t('payment.clickPayPalAbove') }}
                 </p>
                 <button
                   type="button"
                   class="btn btn-outline w-full"
                   @click="close"
                 >
-                  关闭
+                  {{ t('payment.close') }}
                 </button>
               </div>
             </DialogPanel>
@@ -147,6 +147,7 @@
 
 <script setup>
 import { ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import {
   Dialog,
   DialogPanel,
@@ -156,6 +157,8 @@ import {
 } from "@headlessui/vue";
 import StripePayment from "./StripePayment.vue";
 import PayPalButton from "./PayPalButton.vue";
+
+const { t } = useI18n();
 
 const METHOD_STRIPE = "stripe";
 const METHOD_PAYPAL = "paypal";

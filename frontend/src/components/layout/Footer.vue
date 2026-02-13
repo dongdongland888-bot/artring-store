@@ -7,8 +7,7 @@
         <div>
           <h3 class="text-2xl font-serif font-bold mb-4">ArtRing</h3>
           <p class="text-gray-400 text-sm leading-relaxed">
-            精选艺术戒指，每一枚都是独特的艺术品。
-            我们相信，珠宝不仅是装饰，更是个人风格的表达。
+            {{ t('footer.tagline') }}
           </p>
           <!-- 社交媒体 -->
           <div class="flex space-x-4 mt-6">
@@ -38,28 +37,28 @@
 
         <!-- 快速链接 -->
         <div>
-          <h4 class="font-semibold mb-4">快速链接</h4>
+          <h4 class="font-semibold mb-4">{{ t('footer.quickLinks') }}</h4>
           <ul class="space-y-3 text-sm text-gray-400">
             <li>
               <RouterLink to="/shop" class="hover:text-white transition-colors"
-                >全部商品</RouterLink
+                >{{ t('footer.shop') }}</RouterLink
               >
             </li>
             <li>
               <RouterLink to="/about" class="hover:text-white transition-colors"
-                >关于我们</RouterLink
+                >{{ t('footer.about') }}</RouterLink
               >
             </li>
             <li>
               <RouterLink
                 to="/contact"
                 class="hover:text-white transition-colors"
-                >联系我们</RouterLink
+                >{{ t('footer.contact') }}</RouterLink
               >
             </li>
             <li>
               <a href="#" class="hover:text-white transition-colors"
-                >尺寸指南</a
+                >{{ t('footer.sizeGuide') }}</a
               >
             </li>
           </ul>
@@ -67,26 +66,26 @@
 
         <!-- 客户服务 -->
         <div>
-          <h4 class="font-semibold mb-4">客户服务</h4>
+          <h4 class="font-semibold mb-4">{{ t('footer.customerService') }}</h4>
           <ul class="space-y-3 text-sm text-gray-400">
             <li>
               <a href="#" class="hover:text-white transition-colors"
-                >配送政策</a
+                >{{ t('footer.shipping') }}</a
               >
             </li>
             <li>
               <a href="#" class="hover:text-white transition-colors"
-                >退换货政策</a
+                >{{ t('footer.returns') }}</a
               >
             </li>
             <li>
               <a href="#" class="hover:text-white transition-colors"
-                >常见问题</a
+                >{{ t('footer.faq') }}</a
               >
             </li>
             <li>
               <a href="#" class="hover:text-white transition-colors"
-                >隐私政策</a
+                >{{ t('footer.privacy') }}</a
               >
             </li>
           </ul>
@@ -94,22 +93,22 @@
 
         <!-- 订阅 -->
         <div>
-          <h4 class="font-semibold mb-4">订阅获取优惠</h4>
+          <h4 class="font-semibold mb-4">{{ t('footer.subscribeTitle') }}</h4>
           <p class="text-sm text-gray-400 mb-4">
-            订阅我们的邮件，获取新品资讯和独家优惠
+            {{ t('footer.subscribeDesc') }}
           </p>
           <form @submit.prevent="subscribe" class="flex">
             <input
               v-model="email"
               type="email"
-              placeholder="输入邮箱"
+              :placeholder="t('footer.emailPlaceholder')"
               class="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-accent-500"
             />
             <button
               type="submit"
               class="px-4 py-2 bg-accent-500 hover:bg-accent-600 transition-colors"
             >
-              订阅
+              {{ t('footer.subscribe') }}
             </button>
           </form>
         </div>
@@ -121,7 +120,7 @@
       <div
         class="container-custom py-6 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500"
       >
-        <p>© 2024 ArtRing. All rights reserved.</p>
+        <p>{{ t('footer.copyright') }}</p>
         <div class="flex space-x-4 mt-4 md:mt-0 items-center">
           <!-- Visa -->
           <svg
@@ -183,14 +182,16 @@
 
 <script setup>
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { useToast } from "vue-toastification";
 
+const { t } = useI18n();
 const toast = useToast();
 const email = ref("");
 
 const subscribe = () => {
   if (email.value) {
-    toast.success("订阅成功！");
+    toast.success(t("footer.subscribed"));
     email.value = "";
   }
 };
