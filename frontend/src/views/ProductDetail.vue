@@ -241,6 +241,14 @@
         <ProductCard v-for="p in relatedProducts" :key="p.id" :product="p" />
       </div>
     </section>
+
+    <!-- 评价模块 -->
+    <section v-if="product" class="mt-10 sm:mt-20">
+      <h2 class="text-xl sm:text-2xl font-serif font-bold mb-4 sm:mb-8">
+        {{ t('product.reviewsCount', { count: product.reviewCount || 0 }) }}
+      </h2>
+      <ReviewList :product-id="product.id" :can-review="canReview" />
+    </section>
   </div>
 </template>
 
@@ -259,6 +267,7 @@ import {
   ShieldCheckIcon,
 } from "@heroicons/vue/24/outline";
 import ProductCard from "@/components/product/ProductCard.vue";
+import ReviewList from "@/components/review/ReviewList.vue";
 import { useCartStore } from "@/stores/cart";
 import { useAuthStore } from "@/stores/auth";
 import api from "@/api";
@@ -276,6 +285,7 @@ const selectedSize = ref(null);
 const selectedColor = ref(null);
 const quantity = ref(1);
 const imageError = ref(new Set());
+const canReview = ref(false);
 
 // 获取商品详情
 const fetchProduct = async () => {
@@ -295,6 +305,18 @@ const fetchProduct = async () => {
     // 获取相关商品
     if (product.value.id) {
       relatedProducts.value = await api.products.related(product.value.id, 4);
+      
+      // 检查用户是否可以评价(已购买且已登录)
+      if (authStore.isLoggedIn) {
+        try {
+          const pending = await api.reviews.pending();
+          canReview.value = pending.pendingItems?.some(
+            item => item.productId === product.value.id
+          ) || false;
+        } catch (e) {
+          // 忽略错误
+        }
+      }
     }
   } catch (error) {
     console.error("Failed to fetch product:", error);

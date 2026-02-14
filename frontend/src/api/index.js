@@ -152,6 +152,24 @@ const api = {
     capturePayPal: (data) => http.post('/payments/paypal/capture', data)
   },
 
+  // 评价
+  reviews: {
+    // 获取商品评价列表
+    list: (productId, params) => http.get(`/products/${productId}/reviews`, { params }),
+    // 创建评价
+    create: (data) => http.post('/reviews', data),
+    // 编辑评价
+    update: (id, data) => http.put(`/reviews/${id}`, data),
+    // 删除评价
+    delete: (id) => http.delete(`/reviews/${id}`),
+    // 标记有帮助
+    helpful: (id, visitorId) => http.post(`/reviews/${id}/helpful`, { visitorId }),
+    // 获取我的评价
+    my: (params) => http.get('/reviews/my', { params }),
+    // 获取待评价商品
+    pending: () => http.get('/reviews/pending')
+  },
+
   // 管理后台
   admin: {
     dashboard: () => http.get('/admin/dashboard'),
@@ -178,7 +196,12 @@ const api = {
     deleteCategory: (id) => http.delete(`/admin/categories/${id}`),
     // 用户
     users: (params) => http.get('/admin/users', { params }),
-    updateUser: (id, data) => http.put(`/admin/users/${id}`, data)
+    updateUser: (id, data) => http.put(`/admin/users/${id}`, data),
+    // 评价管理
+    reviews: (params) => http.get('/admin/reviews', { params }),
+    approveReview: (id, isApproved) => http.put(`/admin/reviews/${id}/approve`, { isApproved }),
+    pinReview: (id, isPinned) => http.put(`/admin/reviews/${id}/pin`, { isPinned }),
+    deleteReview: (id) => http.delete(`/admin/reviews/${id}`)
   }
 }
 
