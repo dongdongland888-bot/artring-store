@@ -575,4 +575,153 @@ router.put('/users/:id', asyncHandler(async (req, res) => {
   });
 }));
 
+// ==================== 评价管理 ====================
+
+// 获取评价列表(管理员)
+router.get('/reviews', asyncHandler(async (req, res) => {
+  const { page = 1, limit = 20, productId, isApproved, isPinned, rating } = req.query;
+
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+  const take = parseInt(limit);
+
+  const where = {
+    ...(productId && { productId }),
+    ...(isApproved !== undefined && { isApproved: isApproved === 'true' }),
+    ...(isPinned !== undefined && { isPinned: isPinned === 'true' }),
+    ...(rating && { rating: parseInt(rating) })
+  };
+
+  const [reviews, total] = await Promise.all([
+    prisma.review.findMany({
+      where,
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: { id: true, email: true, firstName: true, lastName: true }
+        },
+        product: {
+          select: { id: true, name: true, slug: true }
+        }
+      }
+    }),
+    prisma.review.count({ where })
+  ]);
+
+  res.json({
+    reviews,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total,
+      pages: Math.ceil(total / take)
+    }
+  });
+}));
+
+// 审核评价(通过/拒绝)
+router.put('/reviews/:id/approve', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { isApproved } = req.body;
+
+  const review = await prisma.review.update({
+    where: { id },
+    data: { isApproved }
+  });
+
+  // 更新商品评分统计
+  if (review.productId) {
+    const stats = await prisma.review.aggregate({
+      where: { productId: review.productId, isApproved: true },
+      _avg: { rating: true },
+      _count: { rating: true }
+    });
+
+    await prisma.product.update({
+      where: { id: review.productId },
+      data: {
+        avgRating: stats._avg.rating || 0,
+        reviewCount: stats._count.rating || 0
+      }
+    });
+
+    // 清除缓存
+    const product = await prisma.product.findUnique({
+      where: { id: review.productId },
+      select: { slug: true }
+    });
+    if (product) {
+      await redis.del(`product:${product.slug}`);
+    }
+  }
+
+  res.json({
+    message: isApproved ? '评价已通过审核' : '评价已被拒绝',
+    review
+  });
+}));
+
+// 置顶/取消置顶评价
+router.put('/reviews/:id/pin', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { isPinned } = req.body;
+
+  const review = await prisma.review.update({
+    where: { id },
+    data: { isPinned }
+  });
+
+  res.json({
+    message: isPinned ? '评价已置顶' : '已取消置顶',
+    review
+  });
+}));
+
+// 删除评价(管理员)
+router.delete('/reviews/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const review = await prisma.review.findUnique({
+    where: { id },
+    select: { productId: true }
+  });
+
+  if (!review) {
+    return res.status(404).json({ error: '评价不存在' });
+  }
+
+  // 删除评价
+  await prisma.review.delete({ where: { id } });
+
+  // 删除相关的有帮助记录
+  await prisma.reviewHelpful.deleteMany({ where: { reviewId: id } });
+
+  // 更新商品评分
+  const stats = await prisma.review.aggregate({
+    where: { productId: review.productId, isApproved: true },
+    _avg: { rating: true },
+    _count: { rating: true }
+  });
+
+  await prisma.product.update({
+    where: { id: review.productId },
+    data: {
+      avgRating: stats._avg.rating || 0,
+      reviewCount: stats._count.rating || 0
+    }
+  });
+
+  // 清除缓存
+  const product = await prisma.product.findUnique({
+    where: { id: review.productId },
+    select: { slug: true }
+  });
+  if (product) {
+    await redis.del(`product:${product.slug}`);
+  }
+
+  res.json({ message: '评价已删除' });
+}));
+
 export default router;
