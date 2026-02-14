@@ -10,7 +10,18 @@ import pointsService from '../services/pointsService.js';
 
 const router = express.Router();
 
-// 所有路由需要登录
+/**
+ * GET /api/points/rules
+ * 获取积分规则 (公开接口，无需登录)
+ */
+router.get('/rules', async (req, res) => {
+  res.json({
+    rules: pointsService.POINTS_RULES,
+    levels: pointsService.MEMBER_LEVELS,
+  });
+});
+
+// 以下路由需要登录
 router.use(authenticate);
 
 /**
@@ -114,17 +125,6 @@ router.get('/calculate', async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-});
-
-/**
- * GET /api/points/rules
- * 获取积分规则
- */
-router.get('/rules', async (req, res) => {
-  res.json({
-    rules: pointsService.POINTS_RULES,
-    levels: pointsService.MEMBER_LEVELS,
-  });
 });
 
 export default router;

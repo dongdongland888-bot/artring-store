@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
-import Redis from 'ioredis';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -23,6 +22,9 @@ import pointsRoutes from './routes/points.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { requestLogger } from './middleware/logger.js';
 
+// Redis 服务 (优雅降级)
+import { redisService } from './services/redisService.js';
+
 // 根据 NODE_ENV 从项目根目录加载不同环境配置：
 // - test     → .env.test
 // - 其他环境 → .env.production
@@ -42,16 +44,9 @@ const PORT = process.env.PORT || 3000;
 // 初始化 Prisma
 export const prisma = new PrismaClient();
 
-// 初始化 Redis
-export const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
-
-redis.on('connect', () => {
-  console.log('✅ Redis connected');
-});
-
-redis.on('error', (err) => {
-  console.error('❌ Redis error:', err);
-});
+// 初始化 Redis (可选依赖，失败时优雅降级)
+redisService.init(process.env.REDIS_URL);
+export const redis = redisService;
 
 // 中间件配置
 app.use(cors({
@@ -87,7 +82,8 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    service: 'ArtRing Store API'
+    service: 'ArtRing Store API',
+    redis: redis.connected ? 'connected' : 'disconnected (caching disabled)'
   });
 });
 
