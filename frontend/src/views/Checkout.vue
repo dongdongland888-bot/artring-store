@@ -231,6 +231,21 @@
               <span>${{ totalAmount.toFixed(2) }}</span>
             </div>
 
+            <!-- Points Preview -->
+            <div v-if="pointsPreview.points > 0" class="mt-4 p-3 bg-orange-50 rounded-lg">
+              <div class="flex items-center gap-2 text-sm">
+                <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <span class="text-orange-700">
+                  {{ t('points.earnOnOrder', { points: pointsPreview.points }) }}
+                </span>
+                <span v-if="pointsPreview.isBirthday" class="px-1.5 py-0.5 bg-orange-200 text-orange-800 text-xs rounded-full">
+                  {{ t('points.birthdayDouble') }}
+                </span>
+              </div>
+            </div>
+
             <button
               @click="confirmOrder"
               class="w-full btn btn-primary mt-6"
@@ -544,6 +559,18 @@ const totalAmount = computed(() => {
   return cartStore.subtotal + shippingFee.value;
 });
 
+// Points preview
+const pointsPreview = ref({ points: 0, isBirthday: false, multiplier: 1 });
+
+const loadPointsPreview = async () => {
+  try {
+    const data = await api.points.calculate(totalAmount.value);
+    pointsPreview.value = data;
+  } catch (error) {
+    console.error('Failed to load points preview:', error);
+  }
+};
+
 const openAddressForm = () => {
   Object.assign(addrForm, {
     firstName: "",
@@ -650,6 +677,8 @@ onMounted(async () => {
       selectedAddress.value =
         addresses.value.find((a) => a.isDefault)?.id || addresses.value[0].id;
     }
+    // Load points preview
+    await loadPointsPreview();
   } catch (e) {
     toast.error(t("checkout.loadAddressFailed") + ": " + e.message);
   } finally {

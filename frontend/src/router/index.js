@@ -87,6 +87,11 @@ const routes = [
         path: 'settings',
         name: 'accountSettings',
         component: () => import('@/views/account/Settings.vue')
+      },
+      {
+        path: 'points',
+        name: 'accountPoints',
+        component: () => import('@/views/account/Points.vue')
       }
     ]
   },

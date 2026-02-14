@@ -170,6 +170,22 @@ const api = {
     pending: () => http.get('/reviews/pending')
   },
 
+  // 会员积分
+  points: {
+    // 查询积分余额和等级
+    balance: () => http.get('/points/balance'),
+    // 积分明细(分页)
+    history: (params) => http.get('/points/history', { params }),
+    // 可兑换的优惠券列表
+    coupons: () => http.get('/points/coupons'),
+    // 积分兑换优惠券
+    redeem: (couponId) => http.post('/points/redeem', { couponId }),
+    // 计算订单可获积分
+    calculate: (amount) => http.get('/points/calculate', { params: { amount } }),
+    // 获取积分规则
+    rules: () => http.get('/points/rules')
+  },
+
   // 管理后台
   admin: {
     dashboard: () => http.get('/admin/dashboard'),
