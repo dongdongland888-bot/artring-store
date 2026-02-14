@@ -2,6 +2,7 @@ import express from 'express';
 import { prisma, redis } from '../index.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
+import { awardPurchasePoints } from '../services/pointsService.js';
 
 const router = express.Router();
 
@@ -406,7 +407,7 @@ router.put('/orders/:id/status', asyncHandler(async (req, res) => {
 
   const existing = await prisma.order.findFirst({
     where: orderWhereByIdOrNumber(id),
-    select: { id: true }
+    select: { id: true, userId: true, total: true, status: true }
   });
   if (!existing) {
     return res.status(404).json({ error: '订单不存在' });
@@ -427,9 +428,25 @@ router.put('/orders/:id/status', asyncHandler(async (req, res) => {
     data: updateData
   });
 
+  // 订单完成(送达)时发放积分
+  let pointsAwarded = 0;
+  if (status === 'DELIVERED' && existing.status !== 'DELIVERED') {
+    try {
+      // 根据订单金额发放积分
+      pointsAwarded = await awardPurchasePoints(
+        existing.userId,
+        existing.id,
+        parseFloat(existing.total)
+      );
+    } catch (error) {
+      console.error('发放订单积分失败:', error);
+    }
+  }
+
   res.json({
     message: '订单状态已更新',
-    order
+    order,
+    pointsAwarded
   });
 }));
 

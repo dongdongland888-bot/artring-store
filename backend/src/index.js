@@ -17,6 +17,7 @@ import uploadRoutes from './routes/upload.js';
 import paymentRoutes from './routes/payments.js';
 import adminRoutes from './routes/admin.js';
 import reviewRoutes from './routes/reviews.js';
+import pointsRoutes from './routes/points.js';
 
 // 中间件
 import { errorHandler } from './middleware/errorHandler.js';
@@ -76,6 +77,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/points', pointsRoutes);
 
 // 评价特殊路由挂载到商品路由下
 app.use('/api', reviewRoutes);

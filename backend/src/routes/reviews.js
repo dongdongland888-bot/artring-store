@@ -2,6 +2,7 @@ import express from 'express';
 import { prisma, redis } from '../index.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { authenticate, optionalAuth } from '../middleware/auth.js';
+import { awardReviewPoints } from '../services/pointsService.js';
 
 const router = express.Router();
 
@@ -193,18 +194,14 @@ router.post('/', authenticate, asyncHandler(async (req, res) => {
     await redis.del(`product:${productSlug.slug}`);
   }
 
-  // 评价返积分逻辑(如果有积分系统)
+  // 评价返积分逻辑
   let pointsEarned = 0;
-  if (content && content.length > 10) {
-    pointsEarned += 10; // 文字评价+10分
+  const hasImages = images && images.length > 0;
+  try {
+    pointsEarned = await awardReviewPoints(userId, review.id, hasImages);
+  } catch (error) {
+    console.error('发放评价积分失败:', error);
   }
-  if (images && images.length > 0) {
-    pointsEarned += 20; // 带图+20分
-  }
-  // TODO: 集成会员积分系统
-  // if (pointsEarned > 0) {
-  //   await addUserPoints(userId, pointsEarned, 'REVIEW', review.id);
-  // }
 
   res.status(201).json({
     message: '评价发布成功',
